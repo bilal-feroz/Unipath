@@ -13,14 +13,14 @@ Legend: ✅ done in the repository · ⬜ needs the team
 
 ## Optional
 
-- ⬜ **Working deployment URL** — import the repo at vercel.com/new (free Hobby plan, no environment variables), then add the URL to README and DEVPOST.md.
+- ✅ **Working deployment URL** — https://unipath-eight-peach.vercel.app (Vercel project `unipath`; redeploys automatically on every push to `main`)
 - ⬜ **Team contributions** — fill in the table in README.md and `team` in `src/lib/site.ts` (shown in the footer).
 
 ## Before submitting
 
 - ⬜ Run `npm run check` and `npm run test:e2e` one last time.
 - ⬜ Spot-check a few courses in the app against the official PDFs.
-- ⬜ Open the deployed site on a phone.
+- ✅ Deployed site checked on desktop and phone sizes (demo, planner, what-if, map, theme toggle; no console errors).
 
 ## Known incomplete or out-of-scope features
 

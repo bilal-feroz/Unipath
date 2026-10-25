@@ -69,5 +69,5 @@ We used **Claude (Anthropic) via Claude Code** heavily: it wrote most of the cod
 ## Links
 
 - Repository: https://github.com/bilal-feroz/Unipath
-- Live demo: **[TEAM — add deployment URL]**
+- Live demo: https://unipath-eight-peach.vercel.app
 - Demo video: **[TEAM — add video URL]**

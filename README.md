@@ -6,6 +6,8 @@ UniPath turns a university's static study plan into a personal, interactive road
 
 Built for **NextSpark Hacks 2026**. No account, no API keys, no paid services — everything runs in the browser.
 
+**Live demo: https://unipath-eight-peach.vercel.app** — click **Try Demo** to explore a sample student.
+
 ![UniPath overview for the sample student](docs/screenshots/desktop-overview.png)
 
 | Semester roadmap | What if? | Phone |
@@ -103,7 +105,7 @@ Open http://localhost:3000. Click **Try Demo** for a pre-filled sample student, 
 
 UniPath is a standard Next.js app with no environment variables or backend.
 
-- **Vercel (free Hobby plan):** import the GitHub repository at vercel.com/new, keep the detected Next.js settings, and deploy.
+- **Vercel (free Hobby plan):** the live site at https://unipath-eight-peach.vercel.app is the Vercel project `unipath`, connected to this GitHub repository — every push to `main` redeploys it automatically. To set up your own copy, import the repository at vercel.com/new and keep the detected Next.js settings.
 - **Anywhere else:** `npm run build && npm start` on Node 20.9+.
 
 ## Saving and privacy
