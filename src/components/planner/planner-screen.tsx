@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs } from "radix-ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app-shell/app-shell";
 import { CourseDetailDialog } from "@/components/courses/course-detail-dialog";
 import { NextSemester } from "./next-semester";
@@ -24,6 +24,17 @@ function initialTab(): Tab {
 export function PlannerScreen() {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [openCode, setOpenCode] = useState<string | null>(null);
+
+  // Links like /planner#roadmap should open that tab, including when Next.js re-shows this page
+  // from its preserved state (effects re-run when the page becomes visible again).
+  useEffect(() => {
+    const sync = () => {
+      if (window.location.hash) setTab(initialTab());
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">

@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Building2, Check, Copy, GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/field";
@@ -140,6 +140,20 @@ export function Onboarding() {
   const [query, setQuery] = useState("");
   const curriculum = getCurriculum(curriculumId);
   const [selected, setSelected] = useState<Set<string>>(() => new Set(personal?.progress[curriculumId ?? ""]?.completed ?? []));
+
+  // Next.js keeps hidden pages alive between navigations. Each visit to setup should start fresh,
+  // so reset when this page is hidden (e.g. after finishing, or before "Switch major" brings it back).
+  useLayoutEffect(
+    () => () => {
+      const saved = useAppStore.getState().personal;
+      setStep(0);
+      setQuery("");
+      setUniversityId(saved?.universityId ?? universities[0].id);
+      setCurriculumId(saved?.curriculumId ?? null);
+      setSelected(new Set(saved?.progress[saved.curriculumId]?.completed ?? []));
+    },
+    [],
+  );
 
   const colleges = useMemo(() => majorsByCollege(universityId), [universityId]);
   const sections = useMemo(() => (curriculum ? sectionsFor(curriculum) : []), [curriculum]);

@@ -50,7 +50,6 @@ function CourseNode({ data }: NodeProps<Node<CourseNodeData>>) {
       {/* Clicks (mouse, or Enter/Space on this button) bubble to the map's onNodeClick handler. */}
       <button
         type="button"
-        aria-label={`${data.title}, ${meta.label}`}
         aria-pressed={data.selected}
         style={{
           width: NODE_W,
@@ -71,6 +70,7 @@ function CourseNode({ data }: NodeProps<Node<CourseNodeData>>) {
             {data.code} · {data.credits} cr
           </span>
           <span className="line-clamp-2 block text-[12.5px] font-medium leading-tight text-fg">{data.title}</span>
+          <span className="sr-only">, {meta.label}</span>
         </span>
       </button>
       <Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-line-strong" />

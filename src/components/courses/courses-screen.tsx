@@ -106,7 +106,7 @@ export function CoursesScreen() {
             )}
           >
             {f.label}
-            <span className="num text-xs text-dim">{counts[f.value]}</span>
+            <span className="num text-xs text-muted">{counts[f.value]}</span>
           </button>
         ))}
       </div>
@@ -176,7 +176,6 @@ export function CoursesScreen() {
                         type="button"
                         onClick={() => setOpenCode(course.code)}
                         className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-lg py-2 pr-1 text-left hover:bg-surface-2/40"
-                        aria-label={`${course.title}, ${STATUS_META[state.status].label}. Open details`}
                       >
                         <span className="num hidden w-[72px] shrink-0 text-xs text-dim sm:block">{course.code}</span>
                         <span className="min-w-0 flex-1">
@@ -190,6 +189,7 @@ export function CoursesScreen() {
                         <StatusBadge status={state.status} className="max-sm:hidden" />
                         <StatusBadge status={state.status} compact className="sm:hidden" />
                         <ChevronRight aria-hidden className="size-4 shrink-0 text-dim" />
+                        <span className="sr-only">, open details</span>
                       </button>
                     </li>
                   );

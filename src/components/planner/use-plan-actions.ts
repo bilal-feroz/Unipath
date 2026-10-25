@@ -5,6 +5,7 @@ import { usePlanContext } from "@/components/app-shell/plan-context";
 import { describePrereq, unmetParts } from "@/lib/curriculum/prereq";
 import { courseName, isSlotId, prereqContext } from "@/lib/engine";
 import { useAppStore } from "@/lib/state/store";
+import { joinNames } from "@/lib/utils";
 
 /** Renumbers elective slots so they match the ids the engine generates (slot:group:0, :1, …). */
 function normalizeSlots(ids: string[]): string[] {
@@ -38,9 +39,13 @@ export function usePlanActions() {
     if (currentIds.includes(code)) return { ok: false, title: `${name} is already planned`, description: "It's in your plan for next semester." };
     if (!state.prereqMet) {
       const ctx = prereqContext(plan.index, plan.completed);
-      const missing = unmetParts(course.prerequisite, ctx)
-        .map((part) => describePrereq(part, (c) => courseName(plan.index, c)))
-        .join("; ");
+      const missing = joinNames(
+        unmetParts(course.prerequisite, ctx).map((part) =>
+          part.kind === "credits"
+            ? `${part.min} completed credit hours (you have ${plan.progress.earnedCredits})`
+            : describePrereq(part, (c) => courseName(plan.index, c)),
+        ),
+      );
       return { ok: false, title: `You can't plan ${name} yet`, description: `Complete first: ${missing}.` };
     }
     if (state.notNeeded) {
