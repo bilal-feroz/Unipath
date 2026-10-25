@@ -50,3 +50,6 @@ next-env.d.ts
 
 # local Claude preview config
 /.claude/
+
+# Launch video renders (large files)
+brag-output*/
