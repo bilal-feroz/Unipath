@@ -237,7 +237,7 @@ export function OverviewScreen() {
   const noneCompleted = plan.completed.size === 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 animate-fade-in">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
         eyebrow="01 · Overview"
         title={plan.curriculum.majorName}

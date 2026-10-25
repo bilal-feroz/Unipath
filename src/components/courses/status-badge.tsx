@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export const STATUS_META: Record<
   CourseStatus,
-  { label: string; icon: typeof Lock; text: string; soft: string; border: string; description: string }
+  { label: string; icon: typeof Lock; text: string; soft: string; border: string; description: string; color: string; tint: string }
 > = {
   completed: {
     label: "Completed",
@@ -13,6 +13,8 @@ export const STATUS_META: Record<
     soft: "bg-done-soft",
     border: "border-done/40",
     description: "You've finished this course.",
+    color: "var(--done)",
+    tint: "var(--done-soft)",
   },
   planned: {
     label: "Planned",
@@ -21,6 +23,8 @@ export const STATUS_META: Record<
     soft: "bg-plan-soft",
     border: "border-plan/45",
     description: "In your plan for next semester.",
+    color: "var(--plan)",
+    tint: "var(--plan-soft)",
   },
   eligible: {
     label: "Available",
@@ -29,6 +33,8 @@ export const STATUS_META: Record<
     soft: "bg-open-soft",
     border: "border-open/40",
     description: "You can take this now — its prerequisites are done.",
+    color: "var(--open)",
+    tint: "var(--open-soft)",
   },
   locked: {
     label: "Locked",
@@ -37,6 +43,8 @@ export const STATUS_META: Record<
     soft: "bg-lock-soft",
     border: "border-lock/30",
     description: "You need to complete other courses first.",
+    color: "var(--lock)",
+    tint: "transparent",
   },
 };
 
