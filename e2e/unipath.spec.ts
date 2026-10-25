@@ -48,7 +48,7 @@ test.describe("changing progress", () => {
 
     await page.getByRole("checkbox", { name: "Introduction to Programming: mark as completed" }).check();
     await expect(page.getByText("Introduction to Programming marked as completed")).toBeVisible();
-    await expect(page.getByText(/Now available: .*Object-Oriented Programming/)).toBeVisible();
+    await expect(page.getByText(/Now available next semester: .*Object-Oriented Programming/)).toBeVisible();
     await expect(oop.getByText("Locked")).toHaveCount(0);
 
     await page.goto("/planner");
@@ -155,7 +155,7 @@ test.describe("polish", () => {
         observer.disconnect();
       }).observe(document, { childList: true, subtree: true });
     });
-    for (const path of ["/", "/start", "/about", "/demo", "/courses", "/planner", "/map"]) {
+    for (const path of ["/", "/start", "/about", "/demo", "/courses", "/planner", "/map", "/gpa", "/coach"]) {
       await page.goto(path);
       await page.waitForLoadState("networkidle");
     }
@@ -179,7 +179,7 @@ test.describe("polish", () => {
 });
 
 test.describe("accessibility", () => {
-  for (const [theme, path] of ["dark", "light"].flatMap((t) => ["/", "/overview", "/courses", "/planner", "/map"].map((p) => [t, p]))) {
+  for (const [theme, path] of ["dark", "light"].flatMap((t) => ["/", "/overview", "/courses", "/planner", "/map", "/gpa", "/coach"].map((p) => [t, p]))) {
     test(`has no serious automated accessibility issues on ${path} (${theme} theme)`, async ({ page }) => {
       await page.addInitScript((t) => localStorage.setItem("unipath:theme", t), theme);
       await page.goto("/demo");

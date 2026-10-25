@@ -22,9 +22,9 @@ function SlotPicker({ item }: { item: Extract<PlanItem, { kind: "slot" }> }) {
   const plan = usePlanContext();
   const actions = usePlanActions();
   const group = plan.index.groupById.get(item.groupId)!;
-  const ctx = prereqContext(plan.index, plan.completed);
+  const ctx = prereqContext(plan.index, plan.assumedDone);
   const options = group.courses.filter((code) => {
-    if (plan.completed.has(code) || actions.currentIds.includes(code)) return false;
+    if (plan.assumedDone.has(code) || actions.currentIds.includes(code)) return false;
     return isSatisfied(plan.index.byCode.get(code)!.prerequisite, ctx);
   });
   return (

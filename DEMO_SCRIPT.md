@@ -28,4 +28,7 @@ Uses the built-in sample student, so there's nothing to set up. Numbers below ar
 
 ## Optional extra (if time allows)
 
+- **GPA:** open **GPA** — the sample student has a CGPA of **3.45 (Very Good)** on AAU's official scale. Change Computer Skills from A to B and it drops to 3.39 instantly.
+- **AI Coach** (needs `GEMINI_API_KEY` on the server): in **My Courses**, press the hourglass next to Software Requirements and Specification to mark it as *taking now*, then open **AI Coach** → **Get project ideas**. Point out the "Builds on" chips (real courses from the plan), the industry practices, and the web sources. Ask a follow-up like "Which one should I start with?".
+
 - In What if, choose **Postpone a course → Software Requirements and Specification → by 2 semesters**: graduation moves from Spring 2029 to Fall 2029, because five later courses depend on it.

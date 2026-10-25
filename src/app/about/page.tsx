@@ -102,8 +102,8 @@ export default function AboutPage() {
 
           <Section id="how-it-works" title="How the planner works">
             <p>
-              Everything is calculated in your browser by a deterministic planning engine. No AI model decides anything
-              about your courses — the same inputs always give the same plan.
+              Everything about your courses is calculated in your browser by a deterministic planning engine. No AI model
+              decides anything about eligibility, plans or graduation — the same inputs always give the same plan.
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
@@ -131,13 +131,45 @@ export default function AboutPage() {
                 <strong className="text-fg">What if:</strong> simulations re-run the same engine on a copy of your plan,
                 so your saved progress never changes unless you press Apply.
               </li>
+              <li>
+                <strong className="text-fg">Taking now:</strong> courses you mark as taking this semester aren&apos;t counted
+                as completed, but next semester is planned as if you pass them.
+              </li>
+              <li>
+                <strong className="text-fg">GPA:</strong> your CGPA uses Al Ain University&apos;s official undergraduate grade
+                points (A = 4.0 down to D = 1.0) and rating bands, weighted by credit hours. Pass and Transfer grades aren&apos;t
+                counted.
+              </li>
+            </ul>
+          </Section>
+
+          <Section id="ai-coach" title="How the AI coach works">
+            <p>
+              The AI Coach is the only part of UniPath that uses AI. It suggests portfolio projects and answers questions
+              about them; it never changes your plan or your course rules.
+            </p>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>
+                It uses Google&apos;s <strong className="text-fg">Gemini 2.5 Flash</strong> with Google Search, so it can look up
+                current industry practice. Its answers list the web sources it found.
+              </li>
+              <li>
+                Only course codes go from your browser to UniPath&apos;s server; the server looks up the course names, so the AI
+                only ever sees real courses from your study plan, and any course it mentions that you haven&apos;t taken is
+                removed.
+              </li>
+              <li>AI suggestions can be wrong or out of date. Treat them as ideas to explore, not advice.</li>
             </ul>
           </Section>
 
           <Section title="Limitations">
             <ul className="list-disc space-y-2 pl-5">
               <li>Being eligible doesn&apos;t mean a course is offered next semester or has seats. UniPath has no section data.</li>
-              <li>Grades, GPA rules, transfer credit and course equivalencies aren&apos;t tracked.</li>
+              <li>
+                The GPA only includes courses you&apos;ve passed. Failed attempts and repeated courses also count in your
+                official CGPA. Academic warning and probation rules aren&apos;t modelled.
+              </li>
+              <li>Transfer credit and course equivalencies aren&apos;t tracked.</li>
               <li>Department approval (for example, for capstone projects) is shown but can&apos;t be checked.</li>
               <li>Summer credit limits and maximum loads vary by university and student standing — check yours.</li>
               <li>Transcription mistakes are possible. Always confirm with your academic advisor.</li>
@@ -146,9 +178,15 @@ export default function AboutPage() {
 
           <Section title="Your privacy">
             <p>
-              UniPath has no accounts and no server database. Your progress is saved only in this browser&apos;s local
-              storage, so it stays on this device and is lost if you clear your browser data. Use{" "}
+              UniPath has no accounts and no server database. Your progress and grades are saved only in this
+              browser&apos;s local storage, so they stay on this device and are lost if you clear your browser data. Use{" "}
               <strong className="text-fg">Export progress</strong> in the settings menu to keep a copy.
+            </p>
+            <p>
+              The one exception is the AI Coach, and only when you press a button there: it sends your major, the course
+              codes you&apos;ve completed or are taking, and anything you type (interests, questions) to Google Gemini. Your
+              grades, name and saved file are never sent. On Gemini&apos;s free tier, Google may use these requests to improve
+              its products.
             </p>
           </Section>
         </div>

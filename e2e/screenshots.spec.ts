@@ -10,6 +10,7 @@ const pages = [
   { name: "planner", path: "/planner" },
   { name: "roadmap", path: "/planner#roadmap" },
   { name: "map", path: "/map" },
+  { name: "gpa", path: "/gpa" },
 ];
 
 for (const viewport of [

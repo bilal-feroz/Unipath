@@ -1,4 +1,4 @@
-import { CalendarCheck, CircleCheck, CircleDot, Lock } from "lucide-react";
+import { CalendarCheck, CircleCheck, CircleDot, Hourglass, Lock } from "lucide-react";
 import type { CourseStatus } from "@/lib/engine";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,16 @@ export const STATUS_META: Record<
     description: "You've finished this course.",
     color: "var(--done)",
     tint: "var(--done-soft)",
+  },
+  inprogress: {
+    label: "Taking now",
+    icon: Hourglass,
+    text: "text-now",
+    soft: "bg-now-soft",
+    border: "border-now/45",
+    description: "You're taking this course this semester. UniPath assumes you'll pass it when planning ahead.",
+    color: "var(--now)",
+    tint: "var(--now-soft)",
   },
   planned: {
     label: "Planned",
@@ -48,7 +58,7 @@ export const STATUS_META: Record<
   },
 };
 
-export const STATUS_ORDER: CourseStatus[] = ["completed", "planned", "eligible", "locked"];
+export const STATUS_ORDER: CourseStatus[] = ["completed", "inprogress", "planned", "eligible", "locked"];
 
 export function StatusBadge({ status, className, compact }: { status: CourseStatus; className?: string; compact?: boolean }) {
   const meta = STATUS_META[status];

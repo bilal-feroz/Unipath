@@ -29,12 +29,13 @@ function DesktopNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative flex h-[60px] items-center gap-2 px-3.5 text-[14px] transition-colors lg:px-4",
+              "relative flex h-[60px] items-center gap-2 px-2.5 text-[14px] transition-colors lg:px-3 xl:px-3.5",
               active ? "font-semibold text-fg" : "text-muted hover:text-fg",
             )}
           >
-            <span className={cn("num text-[11.5px]", active ? "text-accent" : "text-dim")}>{item.n}</span>
-            {item.label}
+            <span className={cn("num hidden text-[11.5px] xl:inline", active ? "text-accent" : "text-dim")}>{item.n}</span>
+            <span className="xl:hidden">{item.short}</span>
+            <span className="hidden xl:inline">{item.label}</span>
             {active && (
               <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
             )}
@@ -52,7 +53,7 @@ function MobileNav() {
       aria-label="Main"
       className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-6">
         {NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -62,7 +63,7 @@ function MobileNav() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-[11.5px] font-medium",
+                  "flex h-16 flex-col items-center justify-center gap-1 text-[10.5px] font-medium",
                   active ? "text-accent" : "text-muted",
                 )}
               >
@@ -176,7 +177,7 @@ function ShellContent({ children }: { children: ReactNode }) {
           <>
             <Link
               href="/about"
-              className="hidden items-center gap-2 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-[13px] text-muted hover:border-line-strong hover:text-fg lg:flex"
+              className="hidden items-center gap-2 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-[13px] text-muted hover:border-line-strong hover:text-fg 2xl:flex"
               title={`${plan.curriculum.degree} in ${plan.curriculum.majorName}, ${university?.name}`}
             >
               <Pill tone="accent" className="h-5 px-1.5">

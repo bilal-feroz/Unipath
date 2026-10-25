@@ -26,7 +26,14 @@ export function defaultPreferences(now: Date = new Date()): Preferences {
 }
 
 export function emptyProgress(): CurriculumProgress {
-  return { completed: [], nextSemester: null, electiveChoices: {}, updatedAt: new Date(0).toISOString() };
+  return {
+    completed: [],
+    nextSemester: null,
+    electiveChoices: {},
+    inProgress: [],
+    grades: {},
+    updatedAt: new Date(0).toISOString(),
+  };
 }
 
 export interface ParseResult {

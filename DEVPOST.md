@@ -20,6 +20,8 @@ UniPath turns those static documents into a personal roadmap:
 - **Semester Planner:** a recommended next semester where every course says *why* it was chosen; add or remove courses with clear explanations; a warning (with the reason) if your choices delay graduation; and a full semester-by-semester roadmap.
 - **What if?** Try a lighter or heavier load, summer terms, postponing a course, or retaking one. UniPath compares the result with your current plan and explains the difference using the real dependency chain — without touching your saved progress.
 - **Degree Map:** an interactive prerequisite graph. Click a course to light up everything before and after it. Phones get an accessible list view.
+- **GPA tracker:** enter your grades and see your CGPA on Al Ain University's official 4.0 scale, with its official rating (Excellent to Unsatisfactory).
+- **AI Coach:** portfolio project ideas built on the courses you've finished and the ones you're taking now. It searches the web for what employers currently expect, shows its sources, and answers follow-up questions.
 
 No sign-up, no API keys. Judges can click **Try Demo** and explore a sample student immediately.
 
@@ -29,6 +31,7 @@ No sign-up, no API keys. Judges can click **Try Demo** and explore a sample stud
 - **Curriculum as data.** We transcribed three official study plans into JSON. Prerequisites use a tiny rule language (`0102221 & 0107200`, `(A & B) | D`, `credits>=75`, `[Department approval]`) parsed into expression trees. Every curriculum is validated with Zod plus custom checks (missing references, cycles, credit totals, impossible electives) before students can use it.
 - **A deterministic planning engine**, fully separate from the UI: eligibility, degree-requirement evaluation, a critical-path-first semester scheduler, elective "slots" so the app never picks electives for you, insights, and a what-if simulator that runs on copies of the input.
 - **Honest estimates.** Scheduling with prerequisites and credit caps is NP-hard in general, so the scheduler is a heuristic. It computes a lower bound (remaining credits vs. longest prerequisite chain) and only claims "no plan can finish sooner" when the plan matches that bound.
+- **An AI coach that can't make things up about your degree.** Google Gemini 2.5 Flash with Google Search grounding, called from a server route so the key never reaches the browser. The browser sends only course codes; the server looks up real course names and strips any course the AI mentions that the student hasn't taken. Rate limiting and caching keep it inside the free tier.
 - **Local-first storage:** versioned, validated `localStorage` with backups if saved data can't be read, export/import, and progress stored per major.
 - **Tests:** Vitest unit tests for the engine and data, Playwright end-to-end tests (including axe accessibility scans and a phone viewport).
 
@@ -54,17 +57,17 @@ No sign-up, no API keys. Judges can click **Try Demo** and explore a sample stud
 
 - More majors and universities (the engine is already university-independent).
 - Real section and timetable data, so "eligible" can become "offered and has seats".
-- Grade tracking, minimum-grade rules and GPA tools where the university's policy is verified.
+- Failed attempts, repeats and minimum-grade rules in the GPA, once the university's policy on them is verified.
 - Shareable read-only plans for advisors.
-- An optional assistant that explains (but never overrides) the engine's results.
+- Let the AI Coach also explain the planner's own results in plain language (without ever overriding them).
 
 ## Built with
 
-Next.js, React, TypeScript, Tailwind CSS, Radix UI, Lucide, React Flow, dagre, Zod, Zustand, Sonner, Vitest, Playwright, axe-core.
+Next.js, React, TypeScript, Tailwind CSS, Radix UI, Lucide, React Flow, dagre, Zod, Zustand, Sonner, Google Gemini API, Vitest, Playwright, axe-core.
 
 ## AI usage disclosure
 
-We used **Claude (Anthropic) via Claude Code** heavily: it wrote most of the code, tests and documentation from our specification and the official study plan PDFs we provided, and it transcribed the curricula, which we then **[TEAM — describe how you reviewed the data and code]**. UniPath itself uses no AI at runtime — all planning is deterministic.
+We used **Claude (Anthropic) via Claude Code** heavily: it wrote most of the code, tests and documentation from our specification and the official study plan PDFs we provided, and it transcribed the curricula, which we then **[TEAM — describe how you reviewed the data and code]**. At runtime, only the AI Coach uses AI (Google Gemini 2.5 Flash with Google Search); course rules, planning, simulations and GPA are all deterministic code.
 
 ## Links
 

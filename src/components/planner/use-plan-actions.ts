@@ -36,13 +36,16 @@ export function usePlanActions() {
     if (!course || !state) return { ok: false, title: "Course not found", description: "This course isn't in your plan." };
     const name = course.title;
     if (state.status === "completed") return { ok: false, title: `${name} is already completed`, description: "Nothing to plan here." };
+    if (state.status === "inprogress") {
+      return { ok: false, title: `You're taking ${name} this semester`, description: "UniPath already counts it as done for next semester." };
+    }
     if (currentIds.includes(code)) return { ok: false, title: `${name} is already planned`, description: "It's in your plan for next semester." };
     if (!state.prereqMet) {
-      const ctx = prereqContext(plan.index, plan.completed);
+      const ctx = prereqContext(plan.index, plan.assumedDone);
       const missing = joinNames(
         unmetParts(course.prerequisite, ctx).map((part) =>
           part.kind === "credits"
-            ? `${part.min} completed credit hours (you have ${plan.progress.earnedCredits})`
+            ? `${part.min} completed credit hours (you'll have ${plan.assumedEarnedCredits})`
             : describePrereq(part, (c) => courseName(plan.index, c)),
         ),
       );

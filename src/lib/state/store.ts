@@ -13,6 +13,11 @@ interface Actions {
   setCompleted(codes: string[]): void;
   /** Returns true if the course is now completed. */
   toggleCompleted(code: string): boolean;
+  /** Returns true if the course is now marked as taken this semester. */
+  toggleInProgress(code: string): boolean;
+  setInProgress(codes: string[]): void;
+  /** Record a letter grade for a completed course (null clears it). */
+  setGrade(code: string, grade: string | null): void;
   setNextSemester(ids: string[] | null): void;
   /** Pick an elective for a group. If `replaceId` is in the next-semester plan, the choice takes its place. */
   chooseElective(groupId: string, code: string, replaceId?: string): void;
@@ -86,6 +91,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       withProgress(s, (r) => ({
         ...r,
         completed: [...new Set(codes)],
+        inProgress: r.inProgress.filter((c) => !codes.includes(c)),
         nextSemester: r.nextSemester?.filter((id) => !codes.includes(id)) ?? null,
       })),
     ),
@@ -97,11 +103,50 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       withProgress(s, (r) => ({
         ...r,
         completed: nowCompleted ? [...r.completed, code] : r.completed.filter((c) => c !== code),
+        // A course is either finished or being taken, never both.
+        inProgress: nowCompleted ? r.inProgress.filter((c) => c !== code) : r.inProgress,
         nextSemester: nowCompleted ? (r.nextSemester?.filter((id) => id !== code) ?? null) : r.nextSemester,
       })),
     );
     return nowCompleted;
   },
+
+  toggleInProgress: (code) => {
+    const current = progressOf(activeProfileOf(get()));
+    const nowTaking = !current.inProgress.includes(code);
+    set((s) =>
+      withProgress(s, (r) => ({
+        ...r,
+        inProgress: nowTaking ? [...r.inProgress, code] : r.inProgress.filter((c) => c !== code),
+        completed: nowTaking ? r.completed.filter((c) => c !== code) : r.completed,
+        nextSemester: nowTaking ? (r.nextSemester?.filter((id) => id !== code) ?? null) : r.nextSemester,
+      })),
+    );
+    return nowTaking;
+  },
+
+  setInProgress: (codes) =>
+    set((s) =>
+      withProgress(s, (r) => {
+        const unique = [...new Set(codes)];
+        return {
+          ...r,
+          inProgress: unique,
+          completed: r.completed.filter((c) => !unique.includes(c)),
+          nextSemester: r.nextSemester?.filter((id) => !unique.includes(id)) ?? null,
+        };
+      }),
+    ),
+
+  setGrade: (code, grade) =>
+    set((s) =>
+      withProgress(s, (r) => {
+        const grades = { ...r.grades };
+        if (grade) grades[code] = grade;
+        else delete grades[code];
+        return { ...r, grades };
+      }),
+    ),
 
   setNextSemester: (ids) => set((s) => withProgress(s, (r) => ({ ...r, nextSemester: ids ? [...new Set(ids)] : null }))),
 

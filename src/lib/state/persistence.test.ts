@@ -30,6 +30,8 @@ const sampleState = (): PersistedState => {
     completed: ["0102120", "0107101"],
     nextSemester: null,
     electiveChoices: {},
+    inProgress: ["0102220"],
+    grades: { "0102120": "A" },
     updatedAt: "2026-10-25T00:00:00.000Z",
   };
   return { ...emptyState(), personal };
@@ -43,6 +45,20 @@ describe("persistence", () => {
     const loaded = loadState(storage);
     expect(loaded.state).toEqual(state);
     expect(loaded.notice).toBeNull();
+  });
+
+  it("loads progress saved before grades and in-progress courses existed", () => {
+    const state = sampleState();
+    const old = JSON.parse(JSON.stringify(state));
+    delete old.personal.progress["aau-bsc-computer-science"].inProgress;
+    delete old.personal.progress["aau-bsc-computer-science"].grades;
+    const result = parseStoredState(JSON.stringify(old));
+    expect(result.backup).toBeNull();
+    expect(result.state.personal!.progress["aau-bsc-computer-science"]).toMatchObject({
+      completed: ["0102120", "0107101"],
+      inProgress: [],
+      grades: {},
+    });
   });
 
   it("starts empty when nothing is saved", () => {
@@ -108,6 +124,22 @@ describe("demo student", () => {
     expect(view.nextItems.length).toBeGreaterThan(0);
     expect(view.insight).not.toBeNull();
     expect(view.roadmap.semesters[0].label).toBe("Spring 2027");
+  });
+
+  it("plans next semester around courses being taken now, without counting them as completed", () => {
+    const profile = demoProfile(new Date(2026, 9, 25));
+    const curriculum = getCurriculum(DEMO_CURRICULUM_ID)!;
+    // Taking Software Requirements and Specification + Calculus II this semester.
+    const record = { ...profile.progress[DEMO_CURRICULUM_ID], inProgress: ["0103320", "0107104"] };
+    const view = computePlan(curriculum, record, profile.preferences);
+    expect(view.progress.countedCredits).toBe(49);
+    expect(view.inProgressCredits).toBe(6);
+    expect(view.plannedCodes).not.toContain("0103320");
+    expect(view.plannedCodes).not.toContain("0107104");
+    // Both now-unlocked courses become available next semester.
+    expect(view.states.get("0103330")!.status).not.toBe("locked");
+    expect(view.states.get("0107201")!.status).not.toBe("locked");
+    expect(view.states.get("0103320")!.status).toBe("inprogress");
   });
 
   it("warns when a custom next semester delays graduation", () => {

@@ -39,6 +39,29 @@ data (JSON)  →  curriculum (schema, parser, validation, registry)  →  engine
 - **Never discard saved data silently.** Unreadable or newer-version data is copied to a backup key and the student is told.
 - **Browser-only rendering.** App screens render inside a React `use(browser())` boundary so the server never renders stale or mismatched progress. These routes opt out of Next.js instant-navigation validation (`export const instant = false`) because there is no server-rendered content to validate.
 
+## GPA tracker
+
+`src/lib/gpa` holds grading scales as data (only scales transcribed from an official source; AAU's undergraduate scale today) and a pure `computeGpa` (credit-weighted grade points ÷ graded credits, rounded to two decimals, rated with the official bands). Grades live in each curriculum's saved progress, next to completed courses.
+
+## "Taking now"
+
+Courses marked as taken this semester are stored separately from completed ones. Progress and GPA use completed courses only; eligibility, the next-semester recommendation, the roadmap and insights use completed + in-progress (assuming they're passed), because those all look ahead to next semester.
+
+## AI Coach
+
+The only server code and the only use of AI at runtime.
+
+```
+browser (codes only) → POST /api/coach → zod validation → curriculum lookup → prompt → Gemini 2.5 Flash + Google Search
+                                                                                     ↓
+browser ← normalized ideas / answer + web sources ← JSON extraction, code filtering, length caps
+```
+
+- The key (`GEMINI_API_KEY`) is read only in the route handler; the handler itself (`src/lib/coach/handler.ts`) takes the key and `fetch` as parameters so it can be tested without a network.
+- The prompt is built from course titles the server looks up, so a client can't inject arbitrary "courses". Free text (interests, questions) is length-limited and stripped of control characters.
+- Output is parsed leniently (fences, stray prose) and normalized; `buildsOn` keeps only codes from the student's own list; sources keep only http(s) links. React escapes all text.
+- Free-tier protection: per-visitor sliding-window limit, a per-instance daily cap, and a 30-minute cache of identical idea requests; the browser keeps the last ideas in localStorage.
+
 ## Testing
 
 - `src/**/*.test.ts` (Vitest): parser, AND/OR logic, credit thresholds, notes, corequisites, validation errors, progress and elective capping, status, targets, roadmap validity for every bundled major at several loads (replayed to check prerequisites, caps and completeness), determinism, scenario isolation, persistence, demo data.

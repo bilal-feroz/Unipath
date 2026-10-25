@@ -3,6 +3,7 @@ import {
   buildRoadmap,
   courseImpact,
   courseStates,
+  creditsOf,
   evaluateProgress,
   indexCurriculum,
   knownCodes,
@@ -25,7 +26,16 @@ export interface PlanView {
   curriculum: Curriculum;
   index: CurriculumIndex;
   record: CurriculumProgress;
+  /** Courses actually finished. */
   completed: Set<string>;
+  /** Courses being taken this semester (never also in `completed`). */
+  inProgress: Set<string>;
+  /** Completed plus in-progress: what planning for next semester assumes is done. */
+  assumedDone: Set<string>;
+  /** Credits from courses being taken this semester. */
+  inProgressCredits: number;
+  /** Credit hours earned once this semester's courses are passed (used for "at least N credits" rules). */
+  assumedEarnedCredits: number;
   progress: DegreeProgress;
   settings: PlanSettings;
   /** The engine's own recommendation. */
@@ -45,17 +55,24 @@ export interface PlanView {
 export function computePlan(curriculum: Curriculum, record: CurriculumProgress, preferences: Preferences): PlanView {
   const index = indexCurriculum(curriculum);
   const completed = knownCodes(index, record.completed);
+  const inProgress = knownCodes(
+    index,
+    record.inProgress.filter((c) => !completed.has(c)),
+  );
+  const assumedDone = new Set([...completed, ...inProgress]);
   const progress = evaluateProgress(index, record.completed);
+  const inProgressCredits = creditsOf(index, inProgress);
   const settings: PlanSettings = { ...preferences };
-  const base: RoadmapInput = { index, completed, electiveChoices: record.electiveChoices, settings };
+  // Next semester is planned as if this semester's courses are passed.
+  const base: RoadmapInput = { index, completed: assumedDone, electiveChoices: record.electiveChoices, settings };
   const recommended = buildRoadmap(base);
   const isCustomized = record.nextSemester !== null;
   const roadmap = isCustomized ? buildRoadmap({ ...base, firstSemester: record.nextSemester }) : recommended;
   const first = roadmap.semesters[0];
   const nextItems = first && first.index === 0 ? first.items : [];
   const plannedCodes = nextItems.flatMap((s) => (s.item.kind === "course" ? [s.item.code] : []));
-  const states = courseStates(index, completed, plannedCodes);
-  const insight = nextStepInsight(index, completed, plannedCodes, record.electiveChoices);
+  const states = courseStates(index, completed, plannedCodes, inProgress);
+  const insight = nextStepInsight(index, assumedDone, plannedCodes, record.electiveChoices);
 
   let customDelay: PlanView["customDelay"] = null;
   if (isCustomized && recommended.graduationTerm && roadmap.graduationTerm) {
@@ -64,7 +81,7 @@ export function computePlan(curriculum: Curriculum, record: CurriculumProgress, 
       const dropped = recommendedFirst
         .flatMap((s) => (s.item.kind === "course" ? [s.item.code] : []))
         .filter((code) => !plannedCodes.includes(code))
-        .map((code) => courseImpact(index, completed, code, record.electiveChoices))
+        .map((code) => courseImpact(index, assumedDone, code, record.electiveChoices))
         .sort((a, b) => b.chainLength - a.chainLength || b.downstream.length - a.downstream.length);
       const key = dropped[0];
       customDelay = {
@@ -84,6 +101,10 @@ export function computePlan(curriculum: Curriculum, record: CurriculumProgress, 
     index,
     record,
     completed,
+    inProgress,
+    assumedDone,
+    inProgressCredits,
+    assumedEarnedCredits: creditsOf(index, assumedDone),
     progress,
     settings,
     recommended,

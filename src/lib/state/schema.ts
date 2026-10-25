@@ -18,6 +18,10 @@ export const progressSchema = z.object({
   nextSemester: z.array(z.string()).nullable(),
   /** Elective group id -> chosen course codes, in order of preference. */
   electiveChoices: z.record(z.string(), z.array(z.string())),
+  /** Courses the student is taking this semester. Planning assumes they'll be passed. */
+  inProgress: z.array(z.string()).default([]),
+  /** Course code -> letter grade (for completed courses), used for the GPA tracker. */
+  grades: z.record(z.string(), z.string().max(4)).default({}),
   updatedAt: z.string(),
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarMinus, CalendarPlus, Check, CircleCheck, CircleX, Info, RotateCcw } from "lucide-react";
+import { CalendarMinus, CalendarPlus, Check, CircleCheck, CircleX, Hourglass, Info, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 import { usePlanContext } from "@/components/app-shell/plan-context";
 import { usePlanActions } from "@/components/planner/use-plan-actions";
@@ -102,17 +102,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 /** Everything a student needs to know about one course, plus the actions they can take on it. */
 export function CourseDetail({ code, onSelectCourse }: { code: string; onSelectCourse?: (code: string) => void }) {
   const plan = usePlanContext();
-  const { toggle } = useCourseActions();
+  const { toggle, toggleNow } = useCourseActions();
   const actions = usePlanActions();
   const course = plan.index.byCode.get(code);
   const state = plan.states.get(code);
   if (!course || !state) return <p className="text-sm text-muted">This course isn&apos;t part of your plan.</p>;
 
   const group = plan.index.groupById.get(course.groupId)!;
-  const ctx = prereqContext(plan.index, plan.completed);
+  const ctx = prereqContext(plan.index, plan.assumedDone);
   const check = course.prerequisite ? checkPrereq(course.prerequisite, ctx) : null;
-  const unlocks = state.status === "completed" ? [] : unlockedBy(plan.index, plan.completed, code);
-  const impact = courseImpact(plan.index, plan.completed, code, plan.record.electiveChoices);
+  const unlocks = state.status === "completed" || state.status === "inprogress" ? [] : unlockedBy(plan.index, plan.assumedDone, code);
+  const impact = courseImpact(plan.index, plan.assumedDone, code, plan.record.electiveChoices);
   const meta = STATUS_META[state.status];
   const planned = actions.currentIds.includes(code);
   const addCheck = actions.canAdd(code);
@@ -135,7 +135,13 @@ export function CourseDetail({ code, onSelectCourse }: { code: string; onSelectC
           {state.status === "completed" ? <RotateCcw /> : <Check />}
           {state.status === "completed" ? "Mark as not completed" : "Mark as completed"}
         </Button>
+        {state.status !== "completed" && (
+          <Button variant="secondary" onClick={() => toggleNow(code)} aria-pressed={state.status === "inprogress"}>
+            <Hourglass /> {state.status === "inprogress" ? "Not taking it this semester" : "I'm taking it this semester"}
+          </Button>
+        )}
         {state.status !== "completed" &&
+          state.status !== "inprogress" &&
           (planned ? (
             <Button variant="secondary" onClick={() => actions.remove(code)}>
               <CalendarMinus /> Remove from next semester
@@ -146,7 +152,7 @@ export function CourseDetail({ code, onSelectCourse }: { code: string; onSelectC
             </Button>
           ))}
       </div>
-      {!addCheck.ok && state.status !== "completed" && !planned && (
+      {!addCheck.ok && state.status !== "completed" && state.status !== "inprogress" && !planned && (
         <p id={`why-${code}`} className="mt-2 text-[13px] text-muted">
           {addCheck.title}. {addCheck.description}
         </p>

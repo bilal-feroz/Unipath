@@ -129,6 +129,20 @@ describe("course status", () => {
     expect(unlocks).not.toContain("0103430"); // also needs Software Design and Development
   });
 
+  it("treats courses being taken this semester as done when planning next semester", () => {
+    const completed = ["0102120", "0102220", "0107200"];
+    const states = courseStates(se(), completed, [], ["0102221"]);
+    expect(states.get("0102221")!.status).toBe("inprogress");
+    // Data Structures needs OOP (in progress) and Discrete Mathematics (completed).
+    expect(states.get("0102270")!.status).toBe("eligible");
+    expect(courseStates(se(), completed).get("0102270")!.status).toBe("locked");
+  });
+
+  it("never reports a course as both completed and in progress", () => {
+    const states = courseStates(se(), ["0102120"], [], ["0102120"]);
+    expect(states.get("0102120")!.status).toBe("completed");
+  });
+
   it("reports missing corequisites", () => {
     const index = indexOf(
       rawCurriculum([requiredGroup("core", [course("LEC", 3, undefined, { coreqs: ["LAB"] }), course("LAB", 1)])]),

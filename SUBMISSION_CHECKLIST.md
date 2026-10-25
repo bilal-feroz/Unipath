@@ -14,6 +14,7 @@ Legend: ✅ done in the repository · ⬜ needs the team
 ## Optional
 
 - ✅ **Working deployment URL** — https://unipath-eight-peach.vercel.app (Vercel project `unipath`; redeploys automatically on every push to `main`)
+- ⬜ **AI Coach on the live site** — add a free `GEMINI_API_KEY` in Vercel → `unipath` → Settings → Environment Variables, then redeploy. Without it the coach shows a "not switched on yet" message.
 - ⬜ **Team contributions** — fill in the table in README.md and `team` in `src/lib/site.ts` (shown in the footer).
 
 ## Before submitting
@@ -26,9 +27,9 @@ Legend: ✅ done in the repository · ⬜ needs the team
 
 These are intentionally not built; none of them are claimed in the UI:
 
-- GPA estimator (needs verified university grading policy)
+- GPA projection, target GPA planning and academic standing alerts (the GPA tracker shows current CGPA and rating only)
 - Shareable plan links
-- AI assistant
+- AI explanations of the planner's own results (the AI Coach covers project ideas only)
 - Section/timetable/seat availability
 - Majors beyond Software Engineering, Computer Science and Cybersecurity at Al Ain University
 - Grade and minimum-grade tracking

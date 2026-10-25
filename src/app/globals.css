@@ -32,6 +32,8 @@
   --lock-soft: rgba(142, 161, 174, 0.12);
   --warn: #fbbf24;
   --warn-soft: rgba(251, 191, 36, 0.13);
+  --now: #f5b84a;
+  --now-soft: rgba(245, 184, 74, 0.15);
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.13);
   --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 48px -28px rgba(0, 0, 0, 0.85);
@@ -70,6 +72,8 @@
   --lock-soft: rgba(86, 105, 119, 0.11);
   --warn: #9a5506;
   --warn-soft: rgba(217, 119, 6, 0.12);
+  --now: #8a4b04;
+  --now-soft: rgba(217, 119, 6, 0.12);
   --danger: #b91c1c;
   --danger-soft: rgba(185, 28, 28, 0.1);
   --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 18px 40px -24px rgba(15, 40, 60, 0.35);
@@ -102,6 +106,8 @@
   --color-plan-soft: var(--plan-soft);
   --color-lock: var(--lock);
   --color-lock-soft: var(--lock-soft);
+  --color-now: var(--now);
+  --color-now-soft: var(--now-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
@@ -206,6 +212,14 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Toasts sit over busy content, so they stay nearly opaque to keep their text readable. */
+[data-sonner-toast] {
+  background: color-mix(in oklab, var(--surface-solid) 95%, transparent) !important;
+}
+[data-sonner-toast] [data-description] {
+  color: var(--text-muted) !important;
 }
 
 /* ---------- Theme switch: dark oozes out of / is sucked into the toggle (see lib/theme.ts) ---------- */

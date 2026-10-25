@@ -19,7 +19,7 @@ export function AddCourseDialog() {
 
   const candidates = plan.curriculum.courses.filter((c) => {
     const s = plan.states.get(c.code)!;
-    if (s.status === "completed" || actions.currentIds.includes(c.code) || s.notNeeded) return false;
+    if (s.status === "completed" || s.status === "inprogress" || actions.currentIds.includes(c.code) || s.notNeeded) return false;
     return !q || c.code.toLowerCase().includes(q) || c.title.toLowerCase().includes(q);
   });
   const sortKey = (code: string) => plan.index.byCode.get(code)!.recommendedSemester ?? 99;
@@ -81,7 +81,7 @@ export function AddCourseDialog() {
                 <Lock aria-hidden className="size-4 shrink-0 text-lock" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-muted">{c.title}</p>
-                  <p className="text-[12.5px] text-dim">{lockedReason(plan.index, plan.states.get(c.code)!, plan.progress.earnedCredits)}</p>
+                  <p className="text-[12.5px] text-dim">{lockedReason(plan.index, plan.states.get(c.code)!, plan.assumedEarnedCredits)}</p>
                 </div>
                 <Button size="sm" variant="ghost" onClick={() => actions.add(c.code)} aria-label={`Why can't I add ${c.title}?`}>
                   Why?

@@ -30,7 +30,7 @@ export function WhatIf() {
   );
   const keyCourse = useMemo(() => {
     const next = new Set(plan.plannedCodes);
-    return keyCourses(plan.index, plan.completed, plan.record.electiveChoices, 10).find((k) => next.has(k.code))?.code;
+    return keyCourses(plan.index, plan.assumedDone, plan.record.electiveChoices, 10).find((k) => next.has(k.code))?.code;
   }, [plan]);
 
   const result = useMemo(

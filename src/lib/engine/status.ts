@@ -2,12 +2,13 @@ import { isSatisfied, unmetParts, type PrereqContext } from "@/lib/curriculum/pr
 import type { PrereqExpr } from "@/lib/curriculum/types";
 import { creditsOf, knownCodes, type CurriculumIndex } from "./model";
 
-export type CourseStatus = "completed" | "planned" | "eligible" | "locked";
+/** "inprogress" = being taken this semester; planning assumes it will be passed. */
+export type CourseStatus = "completed" | "inprogress" | "planned" | "eligible" | "locked";
 
 export interface CourseState {
   code: string;
   status: CourseStatus;
-  /** Prerequisites satisfied by completed courses. */
+  /** Prerequisites satisfied by completed courses (and courses being taken this semester). */
   prereqMet: boolean;
   /** The parts of the prerequisite rule that are still missing. */
   missing: PrereqExpr[];
@@ -28,21 +29,29 @@ export function isEligible(index: CurriculumIndex, code: string, ctx: PrereqCont
   return isSatisfied(course.prerequisite, ctx);
 }
 
+/**
+ * Status of every course for planning next semester. Courses being taken this semester are assumed to be
+ * passed, so the courses they unlock show as available.
+ */
 export function courseStates(
   index: CurriculumIndex,
   completedInput: Iterable<string>,
   plannedInput: Iterable<string> = [],
+  inProgressInput: Iterable<string> = [],
 ): Map<string, CourseState> {
   const completed = knownCodes(index, completedInput);
+  const inProgress = knownCodes(index, inProgressInput);
+  for (const code of completed) inProgress.delete(code);
   const planned = knownCodes(index, plannedInput);
-  const ctx = prereqContext(index, completed);
+  const assumedDone = new Set([...completed, ...inProgress]);
+  const ctx = prereqContext(index, assumedDone);
 
   const groupDone = new Map<string, boolean>();
   for (const group of index.curriculum.groups) {
     if (group.rule !== "choose") continue;
     const credits = creditsOf(
       index,
-      group.courses.filter((c) => completed.has(c)),
+      group.courses.filter((c) => assumedDone.has(c)),
     );
     groupDone.set(group.id, credits >= group.minCredits);
   }
@@ -52,6 +61,7 @@ export function courseStates(
     const prereqMet = isSatisfied(course.prerequisite, ctx);
     let status: CourseStatus;
     if (completed.has(course.code)) status = "completed";
+    else if (inProgress.has(course.code)) status = "inprogress";
     else if (planned.has(course.code)) status = "planned";
     else if (prereqMet) status = "eligible";
     else status = "locked";
@@ -60,8 +70,8 @@ export function courseStates(
       status,
       prereqMet,
       missing: unmetParts(course.prerequisite, ctx),
-      coreqMissing: course.corequisites.filter((c) => !completed.has(c) && !planned.has(c)),
-      notNeeded: status !== "completed" && !!groupDone.get(course.groupId),
+      coreqMissing: course.corequisites.filter((c) => !assumedDone.has(c) && !planned.has(c)),
+      notNeeded: status !== "completed" && status !== "inprogress" && !!groupDone.get(course.groupId),
     });
   }
   return states;

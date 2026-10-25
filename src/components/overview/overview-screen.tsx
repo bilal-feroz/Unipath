@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowRight, ChevronDown, GraduationCap, Lightbulb, ListChecks, TriangleAlert } from "lucide-react";
+import { ArrowRight, ChevronDown, Gauge, GraduationCap, Hourglass, Lightbulb, ListChecks, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { PageHeader } from "@/components/app-shell/app-shell";
 import { usePlanContext } from "@/components/app-shell/plan-context";
 import { CourseDetailDialog } from "@/components/courses/course-detail-dialog";
+import { RATING_TONE, useGpa } from "@/components/gpa/use-gpa";
 import { usePlanItemLabel } from "@/components/planner/plan-item-label";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -15,7 +16,8 @@ import { getUniversity } from "@/lib/curriculum/registry";
 import { cn, plural } from "@/lib/utils";
 
 function ProgressCard() {
-  const { progress } = usePlanContext();
+  const { progress, inProgress, inProgressCredits } = usePlanContext();
+  const { scale, result: gpa } = useGpa();
   const [open, setOpen] = useState(false);
   return (
     <Card className="lg:col-span-2" aria-labelledby="progress-title">
@@ -41,9 +43,37 @@ function ProgressCard() {
           ) : (
             <>
               <span className="num font-semibold text-fg">{progress.remainingCredits}</span> credit hours to go.
+              {inProgress.size > 0 && (
+                <>
+                  {" "}
+                  <span className="inline-flex items-center gap-1 text-now">
+                    <Hourglass aria-hidden className="size-3.5" />
+                    {inProgressCredits} more in progress this semester.
+                  </span>
+                </>
+              )}
             </>
           )}
         </p>
+
+        {scale && (
+          <Link
+            href="/gpa"
+            className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-surface-2/40 px-3.5 py-2.5 text-sm transition-colors hover:border-line-strong"
+          >
+            <Gauge aria-hidden className="size-4 text-accent" />
+            {gpa?.cgpa != null ? (
+              <>
+                <span className="text-muted">CGPA</span>
+                <span className="num font-semibold text-fg">{gpa.cgpa.toFixed(2)}</span>
+                {gpa.rating && <Pill tone={RATING_TONE[gpa.rating] ?? "neutral"}>{gpa.rating}</Pill>}
+              </>
+            ) : (
+              <span className="text-muted">Add your grades to see your GPA</span>
+            )}
+            <ArrowRight aria-hidden className="ml-auto size-4 text-dim" />
+          </Link>
+        )}
 
         <button
           type="button"

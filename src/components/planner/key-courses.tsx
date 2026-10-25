@@ -11,8 +11,8 @@ import { plural } from "@/lib/utils";
 export function KeyCourses({ onOpenCourse }: { onOpenCourse: (code: string) => void }) {
   const plan = usePlanContext();
   const top = useMemo(
-    () => keyCourses(plan.index, plan.completed, plan.record.electiveChoices, 5),
-    [plan.index, plan.completed, plan.record.electiveChoices],
+    () => keyCourses(plan.index, plan.assumedDone, plan.record.electiveChoices, 5),
+    [plan.index, plan.assumedDone, plan.record.electiveChoices],
   );
   return (
     <Card aria-labelledby="key-title">

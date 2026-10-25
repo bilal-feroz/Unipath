@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Hourglass } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/app-shell/app-shell";
 import { usePlanContext } from "@/components/app-shell/plan-context";
@@ -29,14 +29,14 @@ function initialFilter(): StatusFilter {
 
 export function CoursesScreen() {
   const plan = usePlanContext();
-  const { toggle } = useCourseActions();
+  const { toggle, toggleNow } = useCourseActions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>(initialFilter);
   const [groupId, setGroupId] = useState("all");
   const [openCode, setOpenCode] = useState<string | null>(null);
 
   const counts = useMemo(() => {
-    const c: Record<StatusFilter, number> = { all: 0, completed: 0, planned: 0, eligible: 0, locked: 0 };
+    const c: Record<StatusFilter, number> = { all: 0, completed: 0, inprogress: 0, planned: 0, eligible: 0, locked: 0 };
     for (const s of plan.states.values()) {
       c.all++;
       c[s.status]++;
@@ -71,7 +71,7 @@ export function CoursesScreen() {
       <PageHeader
         eyebrow="02 · My Courses"
         title="Your courses"
-        description="Tick the courses you've finished. Your progress, plan and graduation estimate update instantly."
+        description="Tick the courses you've finished, and use the hourglass for ones you're taking this semester. Everything updates instantly."
       />
 
       <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
@@ -157,7 +157,7 @@ export function CoursesScreen() {
                   const done = state.status === "completed";
                   const reason =
                     state.status === "locked"
-                      ? lockedReason(plan.index, state, plan.progress.earnedCredits)
+                      ? lockedReason(plan.index, state, plan.assumedEarnedCredits)
                       : state.notNeeded
                         ? "Optional — this requirement is already complete"
                         : "";
@@ -191,6 +191,24 @@ export function CoursesScreen() {
                         <ChevronRight aria-hidden className="size-4 shrink-0 text-dim" />
                         <span className="sr-only">, open details</span>
                       </button>
+                      {!done && (
+                        <button
+                          type="button"
+                          onClick={() => toggleNow(course.code)}
+                          aria-pressed={state.status === "inprogress"}
+                          aria-label={`${course.title}: taking this semester`}
+                          title={state.status === "inprogress" ? "Taking this semester — click to undo" : "Mark as taking this semester"}
+                          className={cn(
+                            "flex size-10 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                            state.status === "inprogress"
+                              ? "border-now/50 bg-now-soft text-now"
+                              : "border-transparent text-dim hover:border-line hover:text-now",
+                          )}
+                        >
+                          <Hourglass aria-hidden className="size-4" />
+                        </button>
+                      )}
+                      {done && <span aria-hidden className="size-10 shrink-0" />}
                     </li>
                   );
                 })}
