@@ -1,6 +1,7 @@
 import { getCurriculum } from "@/lib/curriculum/registry";
 import { DEFAULT_SETTINGS } from "@/lib/engine/scheduler";
 import { defaultStartTerm } from "@/lib/engine/terms";
+import { defaultLifeSettings } from "@/lib/schedule/schema";
 import {
   BACKUP_PREFIX,
   persistedStateSchema,
@@ -32,6 +33,9 @@ export function emptyProgress(): CurriculumProgress {
     electiveChoices: {},
     inProgress: [],
     grades: {},
+    gradeTerms: {},
+    attempts: [],
+    forecast: { best: {}, expected: {}, worst: {} },
     updatedAt: new Date(0).toISOString(),
   };
 }
@@ -47,9 +51,16 @@ export interface ParseResult {
 const UNREADABLE =
   "We couldn't read your saved progress, so UniPath started fresh. A backup copy was kept in this browser.";
 
-/** Older versions are upgraded here. There is only one version so far. */
-function migrate(data: unknown): unknown {
-  return data;
+/**
+ * Older versions are upgraded here, one step at a time.
+ * v1 → v2: adds the semester schedule, life settings and GPA history. Nothing existing changes; the new
+ * fields start empty (the schema fills in their defaults), so saved courses and grades are untouched.
+ */
+export function migrate(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  let d = data as Record<string, unknown>;
+  if (d.version === 1) d = { ...d, version: 2 };
+  return d;
 }
 
 /** Turns stored text into valid state. Never throws, never discards data without keeping a backup. */
@@ -146,5 +157,12 @@ export function importState(text: string): { state: PersistedState } | { error: 
 }
 
 export function newProfile(universityId: string, curriculumId: string, now: Date = new Date()): Profile {
-  return { universityId, curriculumId, progress: {}, preferences: defaultPreferences(now) };
+  return {
+    universityId,
+    curriculumId,
+    progress: {},
+    preferences: defaultPreferences(now),
+    schedules: {},
+    life: defaultLifeSettings(),
+  };
 }

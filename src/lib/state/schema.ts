@@ -1,8 +1,12 @@
 import { z } from "zod";
 import { CREDIT_LIMITS } from "@/lib/engine/scheduler";
+import { lifeSettingsSchema, scheduleSchema } from "@/lib/schedule/schema";
 
-/** Everything UniPath saves in the browser. Bump STATE_VERSION and add a migration when this changes. */
-export const STATE_VERSION = 1;
+/**
+ * Everything UniPath saves in the browser. Bump STATE_VERSION and add a migration when this changes.
+ * v2 added the semester schedule (timetable, tasks, events, attendance), life settings, and GPA history.
+ */
+export const STATE_VERSION = 2;
 export const STORAGE_KEY = "unipath:state";
 export const BACKUP_PREFIX = "unipath:backup:";
 export const THEME_KEY = "unipath:theme";
@@ -22,6 +26,28 @@ export const progressSchema = z.object({
   inProgress: z.array(z.string()).default([]),
   /** Course code -> letter grade (for completed courses), used for the GPA tracker. */
   grades: z.record(z.string(), z.string().max(4)).default({}),
+  /** Course code -> the student's semester number (1 = first) that grade belongs to, for semester GPA. */
+  gradeTerms: z.record(z.string(), z.number().int().min(1).max(20)).default({}),
+  /** Earlier attempts of courses (fails, or grades replaced by a retake). */
+  attempts: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(80),
+        code: z.string().min(1).max(20),
+        grade: z.string().max(4),
+        semester: z.number().int().min(1).max(20).nullable().default(null),
+      }),
+    )
+    .max(100)
+    .default([]),
+  /** Grades the student expects in current courses, per scenario (predictions, never recorded grades). */
+  forecast: z
+    .object({
+      best: z.record(z.string(), z.string().max(4)).default({}),
+      expected: z.record(z.string(), z.string().max(4)).default({}),
+      worst: z.record(z.string(), z.string().max(4)).default({}),
+    })
+    .default({ best: {}, expected: {}, worst: {} }),
   updatedAt: z.string(),
 });
 
@@ -41,6 +67,9 @@ export const profileSchema = z.object({
    */
   progress: z.record(z.string(), progressSchema),
   preferences: preferencesSchema,
+  /** The current semester's schedule, per curriculum (kept apart from degree progress). */
+  schedules: z.record(z.string(), scheduleSchema).default({}),
+  life: lifeSettingsSchema.default(lifeSettingsSchema.parse({})),
 });
 
 export const persistedStateSchema = z.object({

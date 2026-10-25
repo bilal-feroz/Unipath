@@ -25,6 +25,8 @@ export interface GradingScale {
   maxPoints: number;
   /** Grades a student can record for a course they have passed. */
   passingGrades: GradeOption[];
+  /** Failing grades that count in the GPA (for earlier attempts of a course). */
+  failingGrades: GradeOption[];
   /** Highest rating first. */
   ratings: GpaRating[];
   source: { title: string; url: string; retrieved: string };
@@ -47,6 +49,7 @@ export const AAU_UNDERGRADUATE: GradingScale = {
     { symbol: "P", label: "P (Pass)", points: null, range: null },
     { symbol: "T", label: "T (Transfer)", points: null, range: null },
   ],
+  failingGrades: [{ symbol: "F", label: "F", points: 0, range: "below 60" }],
   ratings: [
     { min: 3.6, label: "Excellent" },
     { min: 3.0, label: "Very Good" },
@@ -62,7 +65,8 @@ export const AAU_UNDERGRADUATE: GradingScale = {
   notes: [
     "The minimum passing grade is D. F (below 60) and FA (fail due to absence) are failing grades.",
     "P (Pass) and T (Transfer) carry no grade points, so UniPath leaves them out of the GPA.",
-    "UniPath only knows the courses you've passed. Failed attempts and repeated courses also count in your official CGPA, so it may differ.",
+    "F counts as 0 points. FA (fail due to absence) has no points listed on the grading page, so UniPath doesn't offer it; if your transcript counts it, record it as F.",
+    "The grading page doesn't say which attempt of a repeated course counts, so you choose the policy (all attempts, or only the latest).",
     "The grading guide doesn't say how CGPA is rounded. UniPath rounds to two decimals.",
   ],
 };

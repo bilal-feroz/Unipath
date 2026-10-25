@@ -12,6 +12,7 @@ import {
   saveState,
   type StorageLike,
 } from "./persistence";
+import { emptySchedule } from "@/lib/schedule/schema";
 import { BACKUP_PREFIX, STORAGE_KEY, type PersistedState } from "./schema";
 
 class MemoryStorage implements StorageLike {
@@ -32,7 +33,25 @@ const sampleState = (): PersistedState => {
     electiveChoices: {},
     inProgress: ["0102220"],
     grades: { "0102120": "A" },
+    gradeTerms: { "0102120": 1 },
+    attempts: [],
+    forecast: { best: {}, expected: { "0102220": "B+" }, worst: {} },
     updatedAt: "2026-10-25T00:00:00.000Z",
+  };
+  personal.schedules["aau-bsc-computer-science"] = {
+    ...emptySchedule(),
+    term: { name: "Fall 2026", start: "2026-08-31", end: "2026-12-18", holidays: [] },
+    sessions: [
+      { id: "s1", courseCode: "0102220", kind: "lecture", days: [1, 3], start: "09:00", end: "10:15", professor: "Dr. A", building: "B", floor: "2", room: "204", section: "" },
+    ],
+    tasks: [
+      {
+        id: "t1", title: "Assignment 1", type: "assignment", courseCode: "0102220", dueDate: "2026-11-12", dueTime: "23:59",
+        durationMin: null, location: "", weight: 10, effortHours: null, priority: "auto", done: false, completedAt: null,
+        progress: 0, notes: "", subtasks: [], createdAt: "2026-10-25T00:00:00.000Z", source: "manual",
+      },
+    ],
+    attendance: { "s1@2026-09-02": "present" },
   };
   return { ...emptyState(), personal };
 };
@@ -59,6 +78,49 @@ describe("persistence", () => {
       inProgress: [],
       grades: {},
     });
+  });
+
+  it("upgrades version 1 saves, keeping courses and grades and adding empty schedules", () => {
+    const v1 = {
+      version: 1,
+      activeProfile: "personal",
+      personal: {
+        universityId: "aau",
+        curriculumId: "aau-bsc-software-engineering",
+        progress: {
+          "aau-bsc-software-engineering": {
+            completed: ["0102120"],
+            nextSemester: null,
+            electiveChoices: {},
+            inProgress: ["0102220"],
+            grades: { "0102120": "B+" },
+            updatedAt: "2026-10-01T00:00:00.000Z",
+          },
+        },
+        preferences: newProfile("aau", "x", new Date(2026, 9, 25)).preferences,
+      },
+      demo: null,
+    };
+    const result = parseStoredState(JSON.stringify(v1));
+    expect(result.backup).toBeNull();
+    expect(result.state.version).toBe(2);
+    const p = result.state.personal!;
+    expect(p.progress["aau-bsc-software-engineering"]).toMatchObject({ completed: ["0102120"], inProgress: ["0102220"], grades: { "0102120": "B+" }, attempts: [] });
+    expect(p.schedules).toEqual({});
+    expect(p.life.repeatPolicy).toBe("all");
+    expect(p.life.attendance.rule).toBe("none");
+    // Old exports import too.
+    expect(importState(JSON.stringify(v1))).toHaveProperty("state");
+  });
+
+  it("export and import keep the timetable, tasks and attendance", () => {
+    const state = sampleState();
+    const back = importState(exportState(state));
+    expect(back).toEqual({ state });
+    const sch = (back as { state: PersistedState }).state.personal!.schedules["aau-bsc-computer-science"];
+    expect(sch.sessions[0].room).toBe("204");
+    expect(sch.tasks[0].title).toBe("Assignment 1");
+    expect(sch.attendance["s1@2026-09-02"]).toBe("present");
   });
 
   it("starts empty when nothing is saved", () => {
@@ -106,7 +168,7 @@ describe("persistence", () => {
     const result = importState(exportState(state));
     expect(result).toEqual({ state });
     expect(importState("nope")).toHaveProperty("error");
-    expect(importState(JSON.stringify({ version: 1 }))).toHaveProperty("error");
+    expect(importState(JSON.stringify({ version: 2 }))).toHaveProperty("error");
   });
 });
 
