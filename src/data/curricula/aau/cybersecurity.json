@@ -1,0 +1,200 @@
+{
+  "id": "aau-bsc-cybersecurity",
+  "universityId": "aau",
+  "college": "College of Engineering",
+  "majorId": "cybersecurity",
+  "majorName": "Cybersecurity",
+  "shortName": "CYB",
+  "degree": "Bachelor of Science",
+  "version": "Current study plan (2022 guidance plan)",
+  "totalCredits": 123,
+  "plannedSemesters": 8,
+  "verification": "official-transcribed",
+  "lastUpdated": "2026-10-25",
+  "sources": [
+    {
+      "kind": "study-plan",
+      "title": "Bachelor of Science in Cybersecurity â€“ Study Plan (Al Ain University)",
+      "url": "https://engineering.aau.ac.ae/en/programs/bachelor-of-science-in-cybersecurity",
+      "retrieved": "2026-10-25"
+    },
+    {
+      "kind": "guidance-plan",
+      "title": "Cybersecurity Guidance Plan, 2022 (Al Ain University)",
+      "url": null,
+      "retrieved": "2026-10-25"
+    }
+  ],
+  "dataNotes": [
+    "Courses, credit hours and prerequisites come from the study plan. Suggested semesters come from the 2022 guidance plan.",
+    "The 2022 guidance plan uses different codes for some courses: Foundation of Software Engineering (0103220 vs 0112303), Cybersecurity Law and Policy (0102301 vs 0112301), Cryptography & Computer Network Security (0112202 vs 0112304), Introduction to Artificial Intelligence (0102308 vs 0114208) and the capstone projects (0102490/0102491 vs 0112490/0112491). UniPath uses the study-plan codes and matches suggested semesters by course title.",
+    "The study plan lists 0102320 as the prerequisite for Computer Forensics (0112302), but no course with that code is part of this degree. UniPath shows it as a note to confirm with your advisor instead of blocking the course.",
+    "The study plan lists 0102431 as the prerequisite for Capstone Project II (0112491), but no course with that code is part of this degree. UniPath assumes Capstone Project I (0112490) comes first, as in the university's other engineering programs.",
+    "The Cybersecurity study plan does not list a prerequisite for English 2 (0401121). UniPath follows the plan as written.",
+    "The guidance plan calls 0107200 \"Discrete Structures\"; the study plan calls it \"Discrete Mathematics\". UniPath uses the study-plan title."
+  ],
+  "groups": [
+    {
+      "id": "gen-core",
+      "title": "General education",
+      "category": "university",
+      "rule": "all",
+      "minCredits": 27,
+      "description": "University-wide courses every student takes.",
+      "courses": [
+        { "code": "0102120", "title": "Computer Skills", "credits": 3, "semester": 1 },
+        { "code": "0201111", "title": "Science and Life", "credits": 3, "semester": 7 },
+        { "code": "0401120", "title": "English I", "credits": 3, "semester": 1 },
+        { "code": "0401121", "title": "English 2", "credits": 3, "semester": 2 },
+        { "code": "0405100", "title": "Arabic Language", "credits": 3, "semester": 1 },
+        { "code": "0406110", "title": "Islamic Culture", "credits": 3, "semester": 8 },
+        { "code": "0409103", "title": "UAE Studies", "credits": 3, "semester": 4 },
+        { "code": "0508203", "title": "Scientific Research Methodology", "credits": 3, "semester": 3 },
+        { "code": "0501170", "title": "Fundamentals of Innovation and Entrepreneurship", "credits": 3, "semester": 6 }
+      ]
+    },
+    {
+      "id": "gen-society",
+      "title": "Society & Civilization elective",
+      "category": "university",
+      "rule": "choose",
+      "minCredits": 3,
+      "slotSemesters": [7],
+      "description": "Pick any one course from this list.",
+      "courses": [
+        { "code": "0406100", "title": "Arabs & Muslims' Contributions to Arts & Science", "credits": 3 },
+        { "code": "0408100", "title": "Introduction to Psychology", "credits": 3 },
+        { "code": "0408101A", "title": "Physical Education & Health", "credits": 3 },
+        { "code": "0409100", "title": "Ethical Awareness", "credits": 3 },
+        { "code": "0409102", "title": "Environmental Awareness", "credits": 3 }
+      ]
+    },
+    {
+      "id": "gen-managerial",
+      "title": "Managerial Skills elective",
+      "category": "university",
+      "rule": "choose",
+      "minCredits": 3,
+      "slotSemesters": [8],
+      "description": "Pick any one course from this list.",
+      "courses": [
+        { "code": "0303100", "title": "Law and Society", "credits": 3 },
+        { "code": "0408103", "title": "Thinking Skills", "credits": 3 },
+        { "code": "0408104", "title": "Self-Assessment", "credits": 3 },
+        { "code": "0501100", "title": "Introduction to Time Management", "credits": 3 },
+        { "code": "0501150", "title": "Leadership and Teamwork", "credits": 3 }
+      ]
+    },
+    {
+      "id": "college",
+      "title": "College requirements",
+      "category": "college",
+      "rule": "all",
+      "minCredits": 21,
+      "description": "Math, science and programming foundations required by the college.",
+      "courses": [
+        { "code": "0107101", "title": "Calculus I", "credits": 3, "semester": 1 },
+        { "code": "0107102", "title": "Linear Algebra", "credits": 3, "prereq": "0107101", "semester": 2 },
+        { "code": "0107103", "title": "Probability Theory and Statistics", "credits": 3, "prereq": "0107101", "semester": 3 },
+        { "code": "0107201", "title": "Introduction to Numerical Methods", "credits": 3, "prereq": "0107104 & 0107102", "semester": 3 },
+        { "code": "0108103", "title": "Physics I", "credits": 3, "semester": 1 },
+        { "code": "0102220", "title": "Introduction to Programming", "credits": 3, "prereq": "0102120", "semester": 2 },
+        { "code": "0107200", "title": "Discrete Mathematics", "credits": 3, "semester": 1 }
+      ]
+    },
+    {
+      "id": "major-core",
+      "title": "Major requirements",
+      "category": "major",
+      "rule": "all",
+      "minCredits": 42,
+      "description": "The required courses at the heart of Cybersecurity.",
+      "courses": [
+        { "code": "0102221", "title": "Object-Oriented Programming", "credits": 3, "prereq": "0102220", "semester": 3 },
+        { "code": "0112311", "title": "Secure Programming", "credits": 3, "prereq": "0102270 & 0112200", "semester": 5 },
+        { "code": "0102330", "title": "Database Systems", "credits": 3, "prereq": "0102221", "semester": 4 },
+        { "code": "0102420", "title": "Web Development", "credits": 3, "prereq": "0102330", "semester": 5 },
+        { "code": "0112303", "title": "Foundation of Software Engineering", "credits": 3, "prereq": "0102120", "semester": 2 },
+        { "code": "0102450", "title": "Computer Networks", "credits": 3, "prereq": "0104240", "semester": 3 },
+        { "code": "0102270", "title": "Data Structures and Algorithms", "credits": 3, "prereq": "0102221", "semester": 4 },
+        { "code": "0114208", "title": "Introduction to Artificial Intelligence", "credits": 3, "prereq": "0102270", "semester": 5 },
+        { "code": "0112200", "title": "Computer Security Fundamental", "credits": 3, "prereq": "0102220", "semester": 3 },
+        { "code": "0112304", "title": "Cryptography & Computer Network Security", "credits": 3, "prereq": "0102450 & 0112200", "semester": 4 },
+        { "code": "0102453", "title": "Computer Ethics", "credits": 3, "prereq": "credits>=60", "semester": 5 },
+        {
+          "code": "0112302",
+          "title": "Computer Forensics",
+          "credits": 3,
+          "prereq": "[Course 0102320 is listed as the prerequisite but is not part of this degree. Confirm with your advisor.]",
+          "officialPrereq": "0102320",
+          "semester": 6,
+          "notes": ["The official prerequisite (0102320) is not a course in this plan, so UniPath does not block this course. Check with your advisor."]
+        },
+        { "code": "0104240", "title": "Digital Logic Design", "credits": 3, "prereq": "0107200", "semester": 2 },
+        { "code": "0112300", "title": "Risk Assessment & Management", "credits": 3, "prereq": "0112200", "semester": 5 }
+      ]
+    },
+    {
+      "id": "major-electives",
+      "title": "Major electives",
+      "category": "major",
+      "rule": "choose",
+      "minCredits": 6,
+      "slotSemesters": [6, 7],
+      "description": "Pick two courses (6 credit hours) from this list.",
+      "courses": [
+        { "code": "0112403", "title": "Emerging Technologies IoT and Cloud", "credits": 3, "prereq": "0102450" },
+        { "code": "0112406", "title": "Big Data from Social Networks", "credits": 3, "prereq": "0102330" },
+        { "code": "0112306", "title": "Secure Systems Architectures and Mechanisms", "credits": 3, "prereq": "0112200" },
+        { "code": "0112307", "title": "Intrusion Analysis and Incident Management", "credits": 3, "prereq": "0112201" },
+        { "code": "0112407", "title": "Cyber Warfare", "credits": 3, "prereq": "0112304" }
+      ]
+    },
+    {
+      "id": "supporting",
+      "title": "Supporting courses",
+      "category": "supporting",
+      "rule": "all",
+      "minCredits": 15,
+      "description": "Required courses that support your major.",
+      "courses": [
+        { "code": "0107104", "title": "Calculus II", "credits": 3, "prereq": "0107101", "semester": 2 },
+        { "code": "0112401", "title": "Mobile Applications and Security", "credits": 3, "prereq": "0102221", "semester": 6 },
+        { "code": "0102340", "title": "Operating Systems", "credits": 3, "prereq": "0102270", "semester": 5 },
+        { "code": "0112201", "title": "Ethical Hacking", "credits": 3, "prereq": "0102450 & 0112200", "semester": 4 },
+        { "code": "0112301", "title": "Cybersecurity Law and Policy", "credits": 3, "prereq": "0112200", "semester": 4 }
+      ]
+    },
+    {
+      "id": "internship",
+      "title": "Internship",
+      "category": "internship",
+      "rule": "all",
+      "minCredits": 3,
+      "description": "Work experience. Opens after 75 completed credit hours.",
+      "courses": [
+        { "code": "0112480", "title": "Internship", "credits": 3, "prereq": "credits>=75", "semester": 6 }
+      ]
+    },
+    {
+      "id": "capstone",
+      "title": "Capstone project",
+      "category": "capstone",
+      "rule": "all",
+      "minCredits": 3,
+      "description": "Your final-year project, in two parts.",
+      "courses": [
+        { "code": "0112490", "title": "Capstone Project I", "credits": 1, "prereq": "credits>=90", "semester": 7 },
+        {
+          "code": "0112491",
+          "title": "Capstone Project II",
+          "credits": 2,
+          "prereq": "0112490",
+          "officialPrereq": "0102431",
+          "semester": 8,
+          "notes": ["The official prerequisite (0102431) is not a course in this plan. UniPath assumes Capstone Project I comes first."]
+        }
+      ]
+    }
+  ]
+}

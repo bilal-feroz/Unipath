@@ -1,0 +1,201 @@
+{
+  "id": "aau-bsc-software-engineering",
+  "universityId": "aau",
+  "college": "College of Engineering",
+  "majorId": "software-engineering",
+  "majorName": "Software Engineering",
+  "shortName": "SE",
+  "degree": "Bachelor of Science",
+  "version": "Current study plan",
+  "totalCredits": 124,
+  "plannedSemesters": 8,
+  "verification": "official-transcribed",
+  "lastUpdated": "2026-10-25",
+  "sources": [
+    {
+      "kind": "study-plan",
+      "title": "Bachelor of Science in Software Engineering – Study Plan (Al Ain University)",
+      "url": "https://engineering.aau.ac.ae/en/programs/bachelor-of-science-in-software-engineering",
+      "retrieved": "2026-10-25"
+    },
+    {
+      "kind": "guidance-plan",
+      "title": "Software Engineering Guidance Plan (Al Ain University)",
+      "url": null,
+      "retrieved": "2026-10-25"
+    }
+  ],
+  "dataNotes": [
+    "Courses, credit hours and prerequisites come from the study plan. Suggested semesters come from the guidance plan.",
+    "The guidance plan lists Introduction to Psychology (0408100) in Year 1, Semester 1 and does not list UAE Studies (0409103). The study plan requires UAE Studies plus one Society & Civilization elective, so UniPath follows the study plan and gives UAE Studies no suggested semester.",
+    "The guidance plan calls 0107200 \"Discrete Structures\"; the study plan calls it \"Discrete Mathematics\". UniPath uses the study-plan title.",
+    "Introduction to Programming and Secure Software Engineering are listed as (3,1,3). UniPath counts them as 3 credit hours, which matches the plan's section totals.",
+    "SE Capstone Project I also needs department approval. UniPath shows this but cannot check it."
+  ],
+  "groups": [
+    {
+      "id": "gen-core",
+      "title": "General education",
+      "category": "university",
+      "rule": "all",
+      "minCredits": 24,
+      "description": "University-wide courses every student takes.",
+      "courses": [
+        { "code": "0102120", "title": "Computer Skills", "credits": 3, "semester": 1 },
+        { "code": "0401120", "title": "English (1)", "credits": 3, "semester": 1 },
+        { "code": "0401121", "title": "English (2)", "credits": 3, "prereq": "0401120", "semester": 2 },
+        { "code": "0405100", "title": "Arabic Language", "credits": 3, "semester": 1 },
+        { "code": "0406110", "title": "Islamic Culture", "credits": 3, "semester": 8 },
+        {
+          "code": "0409103",
+          "title": "UAE Studies",
+          "credits": 3,
+          "semester": null,
+          "notes": ["Required by the study plan but not placed in the guidance plan, so it has no suggested semester."]
+        },
+        { "code": "0501170", "title": "Fundamentals of Innovation and Entrepreneurship", "credits": 3, "semester": 2 },
+        { "code": "0508203", "title": "Scientific Research Methodology", "credits": 3, "semester": 5 }
+      ]
+    },
+    {
+      "id": "gen-society",
+      "title": "Society & Civilization elective",
+      "category": "university",
+      "rule": "choose",
+      "minCredits": 3,
+      "slotSemesters": [7],
+      "description": "Pick any one course from this list.",
+      "courses": [
+        { "code": "0406100", "title": "Arabs and Muslims Contributions to Arts and Science", "credits": 3 },
+        { "code": "0408100", "title": "Introduction to Psychology", "credits": 3 },
+        { "code": "0408101A", "title": "Physical Education & Health", "credits": 3 },
+        { "code": "0408105", "title": "Introduction to Early Childhood", "credits": 3 },
+        { "code": "0409100", "title": "Ethical Awareness", "credits": 3 },
+        { "code": "0409102", "title": "Environmental Awareness", "credits": 3 },
+        { "code": "0509210", "title": "Principles of Microeconomics", "credits": 3 }
+      ]
+    },
+    {
+      "id": "gen-managerial",
+      "title": "Managerial Skills elective",
+      "category": "university",
+      "rule": "choose",
+      "minCredits": 3,
+      "slotSemesters": [8],
+      "description": "Pick any one course from this list.",
+      "courses": [
+        { "code": "0303100", "title": "Law and Society", "credits": 3 },
+        { "code": "0408104", "title": "Self Assessment", "credits": 3 },
+        { "code": "0408106", "title": "Critical Thinking", "credits": 3 },
+        { "code": "0501100", "title": "Introduction to Time Management", "credits": 3 },
+        { "code": "0501150", "title": "Leadership and Teamwork", "credits": 3 },
+        { "code": "0502200", "title": "Principles of Financial Accounting", "credits": 3 }
+      ]
+    },
+    {
+      "id": "college",
+      "title": "College requirements",
+      "category": "college",
+      "rule": "all",
+      "minCredits": 24,
+      "description": "Math, science and programming foundations required by the college.",
+      "courses": [
+        { "code": "0102220", "title": "Introduction to Programming", "credits": 3, "prereq": "0102120", "semester": 2 },
+        { "code": "0107101", "title": "Calculus I", "credits": 3, "semester": 1 },
+        { "code": "0107102", "title": "Linear Algebra", "credits": 3, "prereq": "0107101", "semester": 2 },
+        { "code": "0107103", "title": "Probability Theory and Statistics", "credits": 3, "prereq": "0107101", "semester": 3 },
+        { "code": "0107200", "title": "Discrete Mathematics", "credits": 3, "semester": 2 },
+        { "code": "0107201", "title": "Introduction to Numerical Methods", "credits": 3, "prereq": "0107102 & 0107104", "semester": 4 },
+        { "code": "0108103", "title": "Physics I", "credits": 3, "semester": 1 },
+        { "code": "0201100", "title": "Chemistry", "credits": 3, "semester": 3 }
+      ]
+    },
+    {
+      "id": "major-core",
+      "title": "Major requirements",
+      "category": "major",
+      "rule": "all",
+      "minCredits": 42,
+      "description": "The required courses at the heart of Software Engineering.",
+      "courses": [
+        { "code": "0102221", "title": "Object-Oriented Programming", "credits": 3, "prereq": "0102220", "semester": 3 },
+        { "code": "0102270", "title": "Data Structures and Algorithms", "credits": 3, "prereq": "0102221 & 0107200", "semester": 4 },
+        { "code": "0102330", "title": "Database Systems", "credits": 3, "prereq": "0102221", "semester": 5 },
+        { "code": "0102340", "title": "Operating Systems", "credits": 3, "prereq": "0102240", "semester": 5 },
+        { "code": "0102420", "title": "Web Development", "credits": 3, "prereq": "0102330", "semester": 6 },
+        { "code": "0103220", "title": "Foundations of Software Engineering", "credits": 3, "prereq": "0102120", "semester": 3 },
+        { "code": "0103320", "title": "Software Requirements and Specification", "credits": 3, "prereq": "0103220", "semester": 4 },
+        { "code": "0103330", "title": "Software Design and Development", "credits": 3, "prereq": "0103320", "semester": 5 },
+        { "code": "0103331", "title": "Formal Specifications and Design Methods", "credits": 3, "prereq": "0103320 & 0107200", "semester": 6 },
+        { "code": "0103420", "title": "Software Project Management", "credits": 3, "prereq": "0103220", "semester": 4 },
+        { "code": "0103430", "title": "Object-Oriented Analysis and Design", "credits": 3, "prereq": "0102221 & 0103330", "semester": 6 },
+        { "code": "0103431", "title": "User Interface Design", "credits": 3, "prereq": "0103220", "semester": 5 },
+        { "code": "0103440", "title": "Software Measurement and Testing", "credits": 3, "prereq": "0103330", "semester": 6 },
+        { "code": "0103441", "title": "Software Evolution and Maintenance", "credits": 3, "prereq": "0103440", "semester": 7 }
+      ]
+    },
+    {
+      "id": "major-electives",
+      "title": "Major electives",
+      "category": "major",
+      "rule": "choose",
+      "minCredits": 6,
+      "slotSemesters": [6, 7],
+      "description": "Pick two courses (6 credit hours) from this list.",
+      "courses": [
+        { "code": "0102370", "title": "Design and Analysis of Algorithms", "credits": 3, "prereq": "0102270 & 0107200" },
+        { "code": "0102452", "title": "Security of Information Systems", "credits": 3, "prereq": "0102340" },
+        { "code": "0102460", "title": "Introduction to Computer Graphics", "credits": 3, "prereq": "0107102 & 0102270" },
+        { "code": "0102481", "title": "Data and Web Mining", "credits": 3, "prereq": "0102370" },
+        { "code": "0102483", "title": "Mobile Application Development", "credits": 3 },
+        { "code": "0103432", "title": "Agent-Based Modelling", "credits": 3, "prereq": "0103430" },
+        { "code": "0103443", "title": "Secure Software Engineering", "credits": 3, "prereq": "0103330" }
+      ]
+    },
+    {
+      "id": "supporting",
+      "title": "Supporting courses",
+      "category": "supporting",
+      "rule": "all",
+      "minCredits": 16,
+      "description": "Required courses that support your major.",
+      "courses": [
+        { "code": "0102240", "title": "Computer Organization", "credits": 3, "prereq": "0107200", "semester": 4 },
+        { "code": "0102453", "title": "Computer Ethics", "credits": 3, "prereq": "credits>=60", "semester": 5 },
+        { "code": "0107104", "title": "Calculus II", "credits": 3, "prereq": "0107101", "semester": 3 },
+        { "code": "0108104", "title": "Physics I Lab", "credits": 1, "prereq": "0108103", "semester": 3 },
+        { "code": "0108203", "title": "Physics II", "credits": 3, "prereq": "0108103", "semester": 2 },
+        { "code": "0114208", "title": "Introduction to Artificial Intelligence", "credits": 3, "prereq": "0107200 & 0102221", "semester": 4 }
+      ]
+    },
+    {
+      "id": "internship",
+      "title": "Internship",
+      "category": "internship",
+      "rule": "all",
+      "minCredits": 3,
+      "description": "Work experience. Opens after 75 completed credit hours.",
+      "courses": [
+        { "code": "0103480", "title": "SE Internship", "credits": 3, "prereq": "credits>=75", "semester": 6 }
+      ]
+    },
+    {
+      "id": "capstone",
+      "title": "Capstone project",
+      "category": "capstone",
+      "rule": "all",
+      "minCredits": 3,
+      "description": "Your final-year project, in two parts.",
+      "courses": [
+        {
+          "code": "0103490",
+          "title": "SE Capstone Project I",
+          "credits": 1,
+          "prereq": "credits>=90 & [Department approval]",
+          "semester": 7
+        },
+        { "code": "0103491", "title": "SE Capstone Project II", "credits": 2, "prereq": "0103490", "semester": 8 }
+      ]
+    }
+  ]
+}
