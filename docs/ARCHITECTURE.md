@@ -64,7 +64,7 @@ browser ← normalized ideas / answer + web sources ← JSON extraction, code fi
 - The key is read only in the route handler; the handler itself (`src/lib/coach/handler.ts`) takes a provider object (built with an injectable `fetch`) so it can be tested without a network. `GET /api/coach` returns the provider's name, model and privacy link, never the key.
 - The prompt is built from course titles the server looks up, so a client can't inject arbitrary "courses". Free text (interests, questions) is length-limited and stripped of control characters.
 - Output is parsed leniently (fences, stray prose) and normalized; `buildsOn` keeps only codes from the student's own list; sources keep only http(s) links. React escapes all text.
-- Free-tier protection: per-visitor sliding-window limit, a per-instance daily cap, and a 30-minute cache of identical idea requests; the browser keeps the last ideas in localStorage.
+- Free-tier protection (`guard.ts`, built from the small limiters in `rate-limit.ts`): a pause when the provider returns 429 (for its `Retry-After`), one in-flight request per visitor, multi-window sliding limits per visitor (separate for ideas and questions), a server-wide parallel cap, and per-provider minute/day caps under the free tier. A request only counts when it is let through, and its in-flight slot is freed even if the AI call fails. Errors carry `retryAfterSeconds` and a `Retry-After` header; the page counts down and disables the buttons. Plus a 30-minute cache of identical idea requests, and the browser keeps the last ideas in localStorage.
 
 ## Testing
 

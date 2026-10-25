@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { getCurriculum } from "@/lib/curriculum/registry";
 import { providerFromEnv } from "./config";
 import { callGemini, geminiProvider } from "./gemini";
-import { callGroq, stripCitationMarkers } from "./groq";
+import { callGroq, groqProvider, stripCitationMarkers } from "./groq";
+import { createCoachGuard, MAX_PARALLEL } from "./guard";
 import { handleCoachRequest } from "./handler";
 import { cleanAnswer, extractJson, normalizeIdeas, sourcesFrom } from "./parse";
 import { askPrompt, cleanText, ideasPrompt, studentContext } from "./prompt";
-import { createRateLimiter } from "./rate-limit";
+import { retryAfterSeconds, type AiProvider } from "./provider";
+import { createConcurrencyLimiter, createRateLimiter } from "./rate-limit";
 import { coachRequestSchema } from "./schema";
 
 const se = () => getCurriculum("aau-bsc-software-engineering")!;
@@ -60,6 +62,9 @@ const IDEAS_JSON = JSON.stringify({
     { summary: "No title, should be dropped" },
   ],
 });
+
+/** Each test gets its own limits so counts don't leak between tests. */
+const withGuard = (provider: AiProvider | null) => ({ provider, guard: createCoachGuard() });
 
 function post(body: unknown, ip = `test-${Math.random()}`) {
   return new Request("http://localhost/api/coach", {
@@ -142,6 +147,88 @@ describe("rate limiting", () => {
     expect(limiter.check("b", 20).ok).toBe(true);
     expect(limiter.check("a", 1001).ok).toBe(true);
   });
+
+  it("applies every window and only counts allowed requests", () => {
+    const limiter = createRateLimiter([
+      { limit: 2, windowMs: 1000 },
+      { limit: 3, windowMs: 10_000 },
+    ]);
+    expect(limiter.check("a", 0)).toMatchObject({ ok: true, remaining: 1 });
+    expect(limiter.check("a", 1)).toMatchObject({ ok: true, remaining: 0 });
+    expect(limiter.check("a", 2)).toMatchObject({ ok: false, retryAfterSeconds: 1 });
+    expect(limiter.check("a", 1500).ok).toBe(true);
+    // The short window has room again, but the long one is full until the first hit is 10 s old.
+    expect(limiter.check("a", 2000)).toMatchObject({ ok: false, retryAfterSeconds: 8 });
+    expect(limiter.peek("a", 10_001).ok).toBe(true);
+  });
+
+  it("limits parallel work per key", () => {
+    const running = createConcurrencyLimiter(1);
+    expect(running.canStart("a")).toBe(true);
+    running.start("a");
+    expect(running.canStart("a")).toBe(false);
+    expect(running.canStart("b")).toBe(true);
+    running.finish("a");
+    expect(running.canStart("a")).toBe(true);
+  });
+
+  it("reads how long a provider asked us to wait", () => {
+    expect(retryAfterSeconds("7")).toBe(7);
+    expect(retryAfterSeconds("2.4")).toBe(3);
+    expect(retryAfterSeconds(null, "Rate limit reached. Please try again in 1m30.5s.")).toBe(91);
+    expect(retryAfterSeconds(null, undefined, "17s")).toBe(17);
+    expect(retryAfterSeconds(null, "Please try again in 2h3m")).toBe(7380);
+    expect(retryAfterSeconds(null, "no hint here")).toBeUndefined();
+  });
+});
+
+describe("coach guard", () => {
+  const provider = groqProvider({ apiKey: "k", fetchImpl: vi.fn() });
+
+  it("lets one visitor run one request at a time", () => {
+    const guard = createCoachGuard();
+    const first = guard.admit({ visitor: "v", mode: "ask", provider, now: 0 });
+    expect(first.ok).toBe(true);
+    expect(guard.admit({ visitor: "v", mode: "ask", provider, now: 1 })).toMatchObject({ ok: false, error: "rate_limited" });
+    expect(guard.admit({ visitor: "other", mode: "ask", provider, now: 1 }).ok).toBe(true);
+    if (first.ok) first.done();
+    expect(guard.admit({ visitor: "v", mode: "ask", provider, now: 2 }).ok).toBe(true);
+  });
+
+  it("limits ideas and questions separately", () => {
+    const guard = createCoachGuard();
+    const take = (mode: "ideas" | "ask", now: number) => {
+      const r = guard.admit({ visitor: "v", mode, provider, now });
+      if (r.ok) r.done();
+      return r;
+    };
+    for (let i = 0; i < 4; i++) expect(take("ideas", i).ok).toBe(true);
+    const fifth = take("ideas", 10);
+    expect(fifth).toMatchObject({ ok: false, error: "rate_limited", status: 429 });
+    expect(!fifth.ok && fifth.retryAfterSeconds).toBe(600);
+    expect(take("ask", 11).ok).toBe(true);
+  });
+
+  it("caps parallel requests for the whole server", () => {
+    const guard = createCoachGuard();
+    for (let i = 0; i < MAX_PARALLEL; i++) expect(guard.admit({ visitor: `v${i}`, mode: "ask", provider, now: 0 }).ok).toBe(true);
+    expect(guard.admit({ visitor: "late", mode: "ask", provider, now: 0 })).toMatchObject({ ok: false, error: "busy" });
+  });
+
+  it("stays under the provider's free-tier limit and pauses when the provider asks", () => {
+    const guard = createCoachGuard();
+    for (let i = 0; i < provider.limits.perMinute; i++) {
+      const r = guard.admit({ visitor: `v${i}`, mode: "ask", provider, now: i });
+      if (r.ok) r.done();
+    }
+    expect(guard.admit({ visitor: "new", mode: "ask", provider, now: 100 })).toMatchObject({ ok: false, error: "quota" });
+    expect(guard.admit({ visitor: "new", mode: "ask", provider, now: 60_001 }).ok).toBe(true);
+
+    const paused = createCoachGuard();
+    paused.pause(30, 0);
+    expect(paused.admit({ visitor: "v", mode: "ask", provider, now: 1000 })).toMatchObject({ ok: false, error: "quota", retryAfterSeconds: 29 });
+    expect(paused.admit({ visitor: "v", mode: "ask", provider, now: 30_000 }).ok).toBe(true);
+  });
 });
 
 describe("Gemini client", () => {
@@ -188,18 +275,18 @@ describe("POST /api/coach", () => {
   };
 
   it("explains when the AI isn't configured", async () => {
-    const res = await handleCoachRequest(post(body), { provider: null });
+    const res = await handleCoachRequest(post(body), withGuard(null));
     expect(res.status).toBe(503);
     expect(await res.json()).toMatchObject({ error: "not_configured" });
   });
 
   it("rejects bad input before calling the AI", async () => {
     const fetchImpl = vi.fn();
-    const bad = await handleCoachRequest(post({ ...body, curriculumId: "nope" }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    const bad = await handleCoachRequest(post({ ...body, curriculumId: "nope" }), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(bad.status).toBe(400);
-    const tooMany = await handleCoachRequest(post({ ...body, completed: Array(200).fill("x") }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    const tooMany = await handleCoachRequest(post({ ...body, completed: Array(200).fill("x") }), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(tooMany.status).toBe(400);
-    const noQuestion = await handleCoachRequest(post({ ...body, mode: "ask" }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    const noQuestion = await handleCoachRequest(post({ ...body, mode: "ask" }), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(noQuestion.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -207,14 +294,14 @@ describe("POST /api/coach", () => {
   it("returns validated ideas with sources, and caches identical requests", async () => {
     const fetchImpl = vi.fn(async () => geminiReply(IDEAS_JSON));
     const uniqueBody = { ...body, interests: `cache-test-${Math.random()}` };
-    const res = await handleCoachRequest(post(uniqueBody), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    const res = await handleCoachRequest(post(uniqueBody), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.mode).toBe("ideas");
     expect(json.ideas[0].title).toBe("Study group finder");
     expect(json.ideas[0].buildsOn).toEqual(["0102221", "0102270"]);
     expect(json.sources).toEqual([{ title: "example.org", url: "https://example.org/report" }]);
-    await handleCoachRequest(post(uniqueBody), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    await handleCoachRequest(post(uniqueBody), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -232,7 +319,7 @@ describe("POST /api/coach", () => {
           { role: "coach", text: "Hello!" },
         ],
       }),
-      { provider: geminiProvider({ apiKey: "k", fetchImpl }) },
+      withGuard(geminiProvider({ apiKey: "k", fetchImpl })),
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ mode: "ask", answer: "Start with a small prototype." });
@@ -242,21 +329,47 @@ describe("POST /api/coach", () => {
 
   it("reports unreadable AI output", async () => {
     const fetchImpl = vi.fn(async () => geminiReply("Here are some ideas without JSON"));
-    const res = await handleCoachRequest(post({ ...body, interests: `x-${Math.random()}` }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
+    const res = await handleCoachRequest(post({ ...body, interests: `x-${Math.random()}` }), withGuard(geminiProvider({ apiKey: "k", fetchImpl })));
     expect(res.status).toBe(502);
     expect(await res.json()).toMatchObject({ error: "bad_output" });
   });
 
-  it("limits how often one visitor can ask", async () => {
+  it("limits how often one visitor can ask, with Retry-After", async () => {
     const fetchImpl = vi.fn(async () => geminiReply("ok"));
-    const ip = "rate-limit-test";
+    const env = withGuard(geminiProvider({ apiKey: "k", fetchImpl }));
     const statuses: number[] = [];
-    for (let i = 0; i < 9; i++) {
-      const res = await handleCoachRequest(post({ ...body, mode: "ask", question: `q${i}` }, ip), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
-      statuses.push(res.status);
+    let last: Response | undefined;
+    for (let i = 0; i < 6; i++) {
+      last = await handleCoachRequest(post({ ...body, mode: "ask", question: `q${i}` }, "same-visitor"), env);
+      statuses.push(last.status);
     }
-    expect(statuses.slice(0, 8).every((s) => s === 200)).toBe(true);
-    expect(statuses[8]).toBe(429);
+    expect(statuses).toEqual([200, 200, 200, 200, 200, 429]);
+    expect(Number(last!.headers.get("Retry-After"))).toBeGreaterThan(0);
+    expect(await last!.json()).toMatchObject({ error: "rate_limited", retryAfterSeconds: expect.any(Number) });
+    expect(fetchImpl).toHaveBeenCalledTimes(5);
+  });
+
+  it("frees the visitor's slot even when the AI fails", async () => {
+    const fetchImpl = vi.fn(async () => new Response("{}", { status: 500 }));
+    const env = withGuard(geminiProvider({ apiKey: "k", fetchImpl }));
+    const ask = () => handleCoachRequest(post({ ...body, mode: "ask", question: "q" }, "flaky"), env);
+    expect((await ask()).status).toBe(503);
+    expect((await ask()).status).toBe(503);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("pauses everyone when the provider says its quota is used up", async () => {
+    const fetchImpl = vi.fn(
+      async () => new Response(JSON.stringify({ error: { message: "Rate limit reached" } }), { status: 429, headers: { "retry-after": "40" } }),
+    );
+    const env = withGuard(groqProvider({ apiKey: "k", fetchImpl }));
+    const first = await handleCoachRequest(post({ ...body, mode: "ask", question: "q" }, "a"), env);
+    expect(first.status).toBe(429);
+    expect(first.headers.get("Retry-After")).toBe("40");
+    const second = await handleCoachRequest(post({ ...body, mode: "ask", question: "q" }, "b"), env);
+    expect(second.status).toBe(429);
+    expect(await second.json()).toMatchObject({ error: "quota" });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -344,7 +457,11 @@ describe("Groq client", () => {
     expect(await run(new Response(JSON.stringify({ error: { message: "requests per day" } }), { status: 429 }))).toMatchObject({
       ok: false,
       error: "quota",
+      retryAfterSeconds: 30,
     });
+    expect(
+      await run(new Response(JSON.stringify({ error: { message: "tokens per day (TPD): Please try again in 3h2m" } }), { status: 429 })),
+    ).toMatchObject({ ok: false, error: "quota", retryAfterSeconds: 10920, message: expect.stringMatching(/tomorrow/) });
     expect(await run(groqReply(""))).toMatchObject({ ok: false, error: "bad_output" });
   });
 
@@ -368,7 +485,7 @@ describe("choosing the AI provider", () => {
     const provider = providerFromEnv({ GROQ_API_KEY: "q" }, fetchImpl);
     const res = await handleCoachRequest(
       post({ mode: "ideas", curriculumId: "aau-bsc-software-engineering", completed: ["0102221"], interests: `groq-${Math.random()}` }),
-      { provider },
+      withGuard(provider),
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({

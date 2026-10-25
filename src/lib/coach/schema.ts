@@ -71,6 +71,7 @@ export type CoachErrorCode =
   | "not_configured"
   | "bad_request"
   | "rate_limited"
+  | "busy"
   | "quota"
   | "declined"
   | "bad_output"
@@ -79,4 +80,6 @@ export type CoachErrorCode =
 export interface CoachError {
   error: CoachErrorCode;
   message: string;
+  /** When set, the coach can be tried again after this many seconds (also sent as Retry-After). */
+  retryAfterSeconds?: number;
 }

@@ -13,12 +13,13 @@ import {
   RefreshCw,
   Rocket,
   Sparkles,
+  Timer,
   TrendingUp,
   TriangleAlert,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { PageHeader } from "@/components/app-shell/app-shell";
 import { usePlanContext } from "@/components/app-shell/plan-context";
 import { Button } from "@/components/ui/button";
@@ -146,18 +147,39 @@ function IdeaCard({ idea, onAsk }: { idea: ProjectIdea; onAsk: (q: string) => vo
   );
 }
 
-function ErrorPanel({ error }: { error: CoachError }) {
+/** "42s", "3:05", or "about 5 h" for long waits. */
+function formatWait(seconds: number) {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 60 * 60) return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return `about ${Math.round(seconds / 3600)} h`;
+}
+
+const WAIT_ERRORS = new Set<CoachError["error"]>(["rate_limited", "busy", "quota"]);
+
+function ErrorPanel({ error, waitSeconds }: { error: CoachError; waitSeconds: number }) {
   const notSetUp = error.error === "not_configured";
+  const wait = WAIT_ERRORS.has(error.error);
   return (
     <div role="alert" className="flex gap-3 rounded-2xl border border-warn/35 bg-warn-soft p-4 text-sm">
-      <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />
+      {wait ? (
+        <Timer aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />
+      ) : (
+        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />
+      )}
       <div>
-        <p className="font-semibold text-fg">{notSetUp ? "The AI coach isn't switched on yet" : "The coach couldn't answer"}</p>
+        <p className="font-semibold text-fg">
+          {notSetUp ? "The AI coach isn't switched on yet" : wait ? "Please wait a moment" : "The coach couldn't answer"}
+        </p>
         <p className="mt-0.5 text-muted">
           {notSetUp
             ? "This site needs a free AI API key (Groq or Google Gemini) on its server before the coach can work. Everything else in UniPath works without it."
             : error.message}
         </p>
+        {wait && error.retryAfterSeconds ? (
+          <p className="num mt-1.5 text-[12.5px] font-medium text-fg" aria-hidden>
+            {waitSeconds > 0 ? `You can try again in ${formatWait(waitSeconds)}.` : "You can try again now."}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -184,12 +206,22 @@ export function CoachScreen() {
   const coach = useCoach();
   const [interests, setInterests] = useState("");
   const [question, setQuestion] = useState("");
+  const ideasRef = useRef<HTMLElement>(null);
   const inProgress = [...plan.inProgress].map((c) => plan.index.byCode.get(c)!);
+
+  const requestIdeas = (e?: FormEvent) => {
+    e?.preventDefault();
+    if (coach.loading || coach.waitSeconds > 0 || coach.status?.configured === false) return;
+    // On phones the results sit below the form; bring them into view.
+    const top = ideasRef.current?.getBoundingClientRect().top ?? 0;
+    if (top > window.innerHeight * 0.6) ideasRef.current?.scrollIntoView({ block: "start" });
+    void coach.getIdeas(interests);
+  };
 
   const submitQuestion = async (e?: FormEvent, text = question) => {
     e?.preventDefault();
     const q = text.trim();
-    if (!q || coach.loading) return;
+    if (!q || coach.loading || coach.waitSeconds > 0) return;
     setQuestion("");
     const ok = await coach.ask(q);
     if (!ok) setQuestion(q);
@@ -242,29 +274,38 @@ export function CoachScreen() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="interests" className="text-sm font-medium text-fg">
-                  What are you into? <span className="font-normal text-dim">(optional)</span>
-                </label>
-                <input
-                  id="interests"
-                  value={interests}
-                  onChange={(e) => setInterests(e.target.value)}
-                  maxLength={200}
-                  placeholder="e.g. web apps, AI, games, security"
-                  className="mt-2 h-10 w-full rounded-[10px] border border-line bg-bg/60 px-3 text-sm text-fg placeholder:text-dim hover:border-line-strong focus:border-accent focus:outline-none"
-                />
-              </div>
+              <form onSubmit={requestIdeas} className="space-y-5">
+                <div>
+                  <label htmlFor="interests" className="text-sm font-medium text-fg">
+                    What are you into? <span className="font-normal text-dim">(optional)</span>
+                  </label>
+                  <input
+                    id="interests"
+                    value={interests}
+                    onChange={(e) => setInterests(e.target.value)}
+                    maxLength={200}
+                    enterKeyHint="go"
+                    placeholder="e.g. web apps, AI, games, security"
+                    className="mt-2 h-10 w-full rounded-[10px] border border-line bg-bg/60 px-3 text-sm text-fg placeholder:text-dim hover:border-line-strong focus:border-accent focus:outline-none"
+                  />
+                </div>
 
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => coach.getIdeas(interests)}
-                disabled={coach.loading !== null || coach.status?.configured === false}
-              >
-                {coach.ideas ? <RefreshCw /> : <Sparkles />}
-                {coach.loading === "ideas" ? "Thinking…" : coach.ideas ? "Get new ideas" : "Get project ideas"}
-              </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full"
+                  disabled={coach.loading !== null || coach.status?.configured === false || coach.waitSeconds > 0}
+                >
+                  {coach.waitSeconds > 0 ? <Timer /> : coach.ideas ? <RefreshCw /> : <Sparkles />}
+                  {coach.loading === "ideas"
+                    ? "Thinking…"
+                    : coach.waitSeconds > 0
+                      ? `Try again in ${formatWait(coach.waitSeconds)}`
+                      : coach.ideas
+                        ? "Get new ideas"
+                        : "Get project ideas"}
+                </Button>
+              </form>
 
               {coach.status?.configured === false ? (
                 <p role="status" className="flex gap-2 text-[12.5px] leading-relaxed text-warn">
@@ -290,11 +331,11 @@ export function CoachScreen() {
           </Card>
         </div>
 
-        <section aria-labelledby="ideas-title" className="min-w-0 space-y-4">
+        <section ref={ideasRef} aria-labelledby="ideas-title" className="min-w-0 scroll-mt-20 space-y-4">
           <h2 id="ideas-title" className="sr-only">
             Project ideas
           </h2>
-          {coach.error && <ErrorPanel error={coach.error} />}
+          {coach.error && <ErrorPanel error={coach.error} waitSeconds={coach.waitSeconds} />}
 
           {coach.loading === "ideas" ? (
             <LoadingIdeas />
@@ -389,7 +430,7 @@ export function CoachScreen() {
                       placeholder="e.g. Which idea would impress employers most?"
                       className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-bg/60 px-3.5 text-sm text-fg placeholder:text-dim hover:border-line-strong focus:border-accent focus:outline-none"
                     />
-                    <Button type="submit" size="icon" className="size-11" disabled={!question.trim() || coach.loading !== null} aria-label="Send question">
+                    <Button type="submit" size="icon" className="size-11" disabled={!question.trim() || coach.loading !== null || coach.waitSeconds > 0} aria-label="Send question">
                       <ArrowUp />
                     </Button>
                   </form>

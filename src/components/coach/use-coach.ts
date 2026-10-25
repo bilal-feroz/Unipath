@@ -63,6 +63,29 @@ export function useCoach() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   /** Which AI provider the server has (null while loading or if the check failed). */
   const [status, setStatus] = useState<CoachStatus | null>(null);
+  /** When the server asked us to wait (rate limits), the time it's OK to try again. */
+  const [retryAt, setRetryAt] = useState<number | null>(null);
+  const [clock, setClock] = useState(0);
+
+  useEffect(() => {
+    if (retryAt === null) return;
+    const id = setInterval(() => {
+      const t = Date.now();
+      setClock(t);
+      if (t >= retryAt) setRetryAt(null);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [retryAt]);
+
+  const fail = (e: unknown) => {
+    const err = e as CoachError;
+    setError(err);
+    if (err.retryAfterSeconds && err.retryAfterSeconds > 0) {
+      const t = Date.now();
+      setClock(t);
+      setRetryAt(t + err.retryAfterSeconds * 1000);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -93,7 +116,7 @@ export function useCoach() {
         // Saving is a convenience only.
       }
     } catch (e) {
-      setError(e as CoachError);
+      fail(e);
     } finally {
       setLoading(null);
     }
@@ -116,7 +139,7 @@ export function useCoach() {
       setChat((c) => [...c, { role: "coach", text: answer.answer, sources: answer.sources }]);
       return true;
     } catch (e) {
-      setError(e as CoachError);
+      fail(e);
       setChat((c) => c.slice(0, -1));
       return false;
     } finally {
@@ -130,6 +153,8 @@ export function useCoach() {
     stale: !!cached && cached.fingerprint !== fingerprint,
     loading,
     error,
+    /** Seconds until the coach can be asked again (0 when it can be asked now). */
+    waitSeconds: retryAt === null ? 0 : Math.max(0, Math.ceil((retryAt - clock) / 1000)),
     chat,
     getIdeas,
     ask,

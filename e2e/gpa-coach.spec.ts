@@ -141,6 +141,25 @@ test.describe("AI coach", () => {
     await expect(page.getByText(/didn.t use a live web search/)).toBeVisible();
   });
 
+  test("counts down and blocks the button while the coach is rate limited", async ({ page }) => {
+    await page.route("**/api/coach", (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ json: STATUS })
+        : route.fulfill({
+            status: 429,
+            headers: { "Retry-After": "3" },
+            json: { error: "rate_limited", message: "That's a lot of new ideas in a short time!", retryAfterSeconds: 3 },
+          }),
+    );
+    await openDemo(page);
+    await page.goto("/coach");
+    await page.getByRole("button", { name: "Get project ideas" }).click();
+    await expect(page.getByText("Please wait a moment")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Try again in \ds/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Get project ideas" })).toBeEnabled({ timeout: 6000 });
+    await expect(page.getByText("You can try again now.")).toBeVisible();
+  });
+
   test("explains when the AI isn't set up on the server", async ({ page }) => {
     await page.route("**/api/coach", (route) =>
       route.request().method() === "GET"

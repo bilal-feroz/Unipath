@@ -1,5 +1,5 @@
 import { sourcesFrom } from "./parse";
-import type { AiOutcome, AiProvider, AiTurn } from "./provider";
+import { retryAfterSeconds, type AiOutcome, type AiProvider, type AiTurn } from "./provider";
 
 /**
  * Calls Google's Gemini API (generateContent) with Google Search grounding.
@@ -19,7 +19,7 @@ interface GeminiResponseBody {
     };
   }[];
   promptFeedback?: { blockReason?: string };
-  error?: { code?: number; message?: string; status?: string };
+  error?: { code?: number; message?: string; status?: string; details?: { retryDelay?: string }[] };
 }
 
 const DECLINED_REASONS = new Set(["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION"]);
@@ -66,11 +66,17 @@ export async function callGemini({
   if (!res.ok) {
     const detail = `${data.error?.status ?? ""} ${data.error?.message ?? ""}`;
     if (res.status === 429) {
+      const wait = retryAfterSeconds(
+        res.headers.get("retry-after"),
+        ...(data.error?.details ?? []).map((d) => d.retryDelay),
+        data.error?.message,
+      );
       return {
         ok: false,
         status: 429,
         error: "quota",
-        message: "The free AI quota is used up for now. Please try again later.",
+        message: "The free AI allowance is busy right now. Please wait a moment and try again.",
+        retryAfterSeconds: wait ?? 30,
       };
     }
     if ((res.status === 400 || res.status === 401 || res.status === 403) && /api key|permission|unauthenticated/i.test(detail)) {
@@ -118,6 +124,8 @@ export function geminiProvider({
     model: resolved,
     privacyUrl: "https://ai.google.dev/gemini-api/terms",
     privacyNote: "On Gemini's free tier, Google may use requests to improve its products.",
+    // Under Gemini 2.5 Flash's free tier (10 requests a minute, 250 a day).
+    limits: { perMinute: 8, perDay: 200 },
     // Gemini decides for itself when to search; the Google Search tool is always offered.
     call: ({ system, turns }) => callGemini({ apiKey, model: resolved, system, turns, fetchImpl }),
   };

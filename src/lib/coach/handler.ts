@@ -1,25 +1,37 @@
 import { getCurriculum } from "@/lib/curriculum/registry";
 import { cleanAnswer, extractJson, normalizeIdeas } from "./parse";
+import { createCoachGuard, type CoachGuard } from "./guard";
 import type { AiProvider, AiTurn } from "./provider";
 import { askPrompt, cleanText, COACH_SYSTEM_PROMPT, ideasPrompt, studentContext } from "./prompt";
-import { createRateLimiter } from "./rate-limit";
 import { coachRequestSchema, type CoachError, type CoachErrorCode, type CoachResponse, type IdeasResponse } from "./schema";
 
-const perVisitor = createRateLimiter({ limit: 8, windowMs: 10 * 60_000 });
-// Stays under the free tier's daily grounded-request allowance even if every instance is busy.
-const perInstance = createRateLimiter({ limit: 400, windowMs: 24 * 60 * 60_000 });
+const sharedGuard = createCoachGuard();
 
 const ideasCache = new Map<string, { at: number; value: IdeasResponse }>();
 const CACHE_MS = 30 * 60_000;
 
-function error(status: number, code: CoachErrorCode, message: string, headers: Record<string, string> = {}) {
-  return Response.json({ error: code, message } satisfies CoachError, { status, headers });
+function error(status: number, code: CoachErrorCode, message: string, retryAfterSeconds?: number) {
+  return Response.json({ error: code, message, retryAfterSeconds } satisfies CoachError, {
+    status,
+    headers: retryAfterSeconds ? { "Retry-After": String(retryAfterSeconds) } : undefined,
+  });
+}
+
+/** Vercel sets x-real-ip and x-forwarded-for itself, so visitors can't choose their own. */
+function visitorId(request: Request): string {
+  return (
+    request.headers.get("x-real-ip")?.trim() ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "local"
+  );
 }
 
 export interface HandlerEnv {
   /** Null when no AI key is configured on the server. */
   provider: AiProvider | null;
   now?: () => Date;
+  /** Rate limits; tests pass their own so they don't share counts. */
+  guard?: CoachGuard;
 }
 
 /** POST /api/coach — project ideas and follow-up answers. Kept separate from the route file for testing. */
@@ -61,16 +73,9 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
     if (hit && now.getTime() - hit.at < CACHE_MS) return Response.json(hit.value);
   }
 
-  const visitor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  const limited = perVisitor.check(visitor, now.getTime());
-  if (!limited.ok) {
-    return error(429, "rate_limited", "That's a lot of questions! Please wait a few minutes and try again.", {
-      "Retry-After": String(limited.retryAfterSeconds),
-    });
-  }
-  if (!perInstance.check("all", now.getTime()).ok) {
-    return error(429, "quota", "The free AI quota for today is used up. Please try again tomorrow.");
-  }
+  const guard = env.guard ?? sharedGuard;
+  const admitted = guard.admit({ visitor: visitorId(request), mode: req.mode, provider, now: now.getTime() });
+  if (!admitted.ok) return error(admitted.status, admitted.error, admitted.message, admitted.retryAfterSeconds);
 
   const turns: AiTurn[] = [];
   if (req.mode === "ideas") {
@@ -85,12 +90,21 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
     turns.push({ role: "user", text: askPrompt(ctx, question!, (req.ideaTitles ?? []).map((t) => cleanText(t, 140) ?? "").filter(Boolean)) });
   }
 
-  const result = await provider.call({
-    system: COACH_SYSTEM_PROMPT,
-    turns,
-    search: req.mode === "ideas" ? "require" : "allow",
-  });
-  if (!result.ok) return error(result.status, result.error, result.message);
+  let result;
+  try {
+    result = await provider.call({
+      system: COACH_SYSTEM_PROMPT,
+      turns,
+      search: req.mode === "ideas" ? "require" : "allow",
+    });
+  } finally {
+    admitted.done();
+  }
+  if (!result.ok) {
+    // The provider's own limit was hit: pause everyone instead of sending more doomed requests.
+    if (result.error === "quota") guard.pause(result.retryAfterSeconds ?? 30, now.getTime());
+    return error(result.status, result.error, result.message, result.retryAfterSeconds);
+  }
   const meta = {
     sources: result.sources,
     searchQueries: result.searchQueries,

@@ -19,8 +19,8 @@ export function LivePreview() {
   const locked = [...plan.states.values()].filter((s) => s.status === "locked" && !s.notNeeded).slice(0, 1);
 
   return (
-    <div className="grid gap-3 p-4 sm:grid-cols-5 sm:p-5">
-      <div className="glass rounded-xl border border-line p-4 sm:col-span-3">
+    <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-5 sm:p-5">
+      <div className="glass min-w-0 rounded-xl border border-line p-4 sm:col-span-3">
         <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Degree progress</p>
         <p className="mt-2 flex items-baseline gap-2">
           <span className="num text-3xl font-semibold">{plan.progress.countedCredits}</span>
@@ -50,7 +50,7 @@ export function LivePreview() {
           ))}
         </ul>
       </div>
-      <div className="flex flex-col gap-3 sm:col-span-2">
+      <div className="flex min-w-0 flex-col gap-3 sm:col-span-2">
         <div className="glass rounded-xl border border-line p-4">
           <div className="flex items-center justify-between">
             <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Estimated graduation</p>

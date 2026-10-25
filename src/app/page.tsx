@@ -2,11 +2,13 @@ import {
   ArrowRight,
   CalendarRange,
   FlaskConical,
+  Gauge,
   LayoutDashboard,
   ListChecks,
   Lock,
   MousePointerClick,
   ShieldCheck,
+  Sparkles,
   Waypoints,
 } from "lucide-react";
 import Link from "next/link";
@@ -48,9 +50,19 @@ const features = [
     body: "Click any course to light up what it needs first and everything it unlocks later.",
   },
   {
+    icon: Gauge,
+    title: "GPA",
+    body: "Enter your grades and see your CGPA on Al Ain University's official 4.0 scale, with its official rating.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI Coach",
+    body: "Portfolio project ideas built on your own courses and checked against what employers want right now.",
+  },
+  {
     icon: ShieldCheck,
     title: "Honest by design",
-    body: "Built on official study plans. No AI guesswork, no sign-up, and your data stays in your browser.",
+    body: "Planning comes from the official study plans, never from AI. No sign-up, and your data stays in your browser.",
   },
 ];
 
@@ -80,7 +92,7 @@ const revealStep = ["reveal", "reveal reveal-2", "reveal reveal-3"];
 
 function PreviewSkeleton() {
   return (
-    <div className="grid gap-3 p-4 sm:grid-cols-5 sm:p-5" aria-hidden>
+    <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-5 sm:p-5" aria-hidden>
       <div className="glass h-64 animate-pulse rounded-xl sm:col-span-3" />
       <div className="glass h-64 animate-pulse rounded-xl sm:col-span-2" />
     </div>
@@ -186,16 +198,16 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="Features"
             title="Everything about your degree, in one calm place"
-            body="Four screens, no clutter. Each one answers a question students actually ask."
+            body="Six screens and a what-if simulator, no clutter. Each one answers a question students actually ask."
           />
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
                 <li
                   key={f.title}
                   className={cn(
-                    revealStep[i % 3],
+                    revealStep[Math.min(i % 4, 2)],
                     "glass group rounded-2xl border border-line p-6 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_24px_60px_-30px_var(--accent)]",
                   )}
                 >

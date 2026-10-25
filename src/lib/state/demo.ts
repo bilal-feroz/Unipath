@@ -26,6 +26,18 @@ export const DEMO_GRADES: Record<string, string> = {
 export const DEMO_DESCRIPTION =
   "A sample Software Engineering student who has finished three semesters but hasn't taken Calculus II yet.";
 
+/**
+ * Demos saved before the GPA tracker existed have no grades at all; give them the sample grades for the
+ * courses they've completed. Returns the same object when nothing needs to change.
+ */
+export function withDemoGrades(profile: Profile): Profile {
+  const progress = profile.progress[DEMO_CURRICULUM_ID];
+  if (!progress || Object.keys(progress.grades ?? {}).length > 0) return profile;
+  const grades = Object.fromEntries(Object.entries(DEMO_GRADES).filter(([code]) => progress.completed.includes(code)));
+  if (Object.keys(grades).length === 0) return profile;
+  return { ...profile, progress: { ...profile.progress, [DEMO_CURRICULUM_ID]: { ...progress, grades } } };
+}
+
 export function demoProfile(now: Date = new Date()): Profile {
   const profile = newProfile("aau", DEMO_CURRICULUM_ID, now);
   profile.progress[DEMO_CURRICULUM_ID] = {

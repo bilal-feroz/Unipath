@@ -62,7 +62,7 @@ The coach is the only part of UniPath that uses AI, and it never touches plannin
 - **Key stays on the server:** the key is read only by the route handler; the browser never sees it. `GET /api/coach` tells the page which provider and model are in use (never the key), so the privacy note names them and links their data policy.
 - **Grounded in real courses:** the browser sends only course codes; the server validates them against the curriculum, looks up the titles itself, and removes any course the AI mentions that isn't in the student's list.
 - **Checked output:** the answer is parsed and normalized before it's shown; unreadable answers produce a clear error instead of broken UI.
-- **Protects the free quota:** per-visitor rate limiting, a daily cap per server instance, and a 30-minute cache for identical requests. The browser also remembers the last ideas.
+- **Protects the free quota** ([`guard.ts`](src/lib/coach/guard.ts)): one request at a time per visitor; per-visitor limits (ideas: 4 per 10 minutes and 15 a day; questions: 5 a minute, 20 per 10 minutes and 60 a day); at most 4 AI calls in parallel per server; a per-provider cap kept under its free tier (Groq: 15 a minute, 450 a day); and when the provider itself says "slow down", every request pauses for as long as it asks (`Retry-After`). Limited answers carry `Retry-After`, and the page shows a countdown and re-enables the buttons when it ends. Identical idea requests are cached for 30 minutes (and don't count), and the browser remembers the last ideas. Limits are kept in memory per server instance, so they guard the free quota rather than act as a security boundary.
 
 ## Curriculum data
 

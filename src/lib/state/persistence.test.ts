@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getCurriculum } from "@/lib/curriculum/registry";
 import { computePlan } from "@/lib/plan";
-import { DEMO_COMPLETED, DEMO_CURRICULUM_ID, demoProfile } from "./demo";
+import { DEMO_COMPLETED, DEMO_CURRICULUM_ID, demoProfile, withDemoGrades } from "./demo";
 import {
   emptyState,
   exportState,
@@ -140,6 +140,16 @@ describe("demo student", () => {
     expect(view.states.get("0103330")!.status).not.toBe("locked");
     expect(view.states.get("0107201")!.status).not.toBe("locked");
     expect(view.states.get("0103320")!.status).toBe("inprogress");
+  });
+
+  it("gives demos saved before the GPA tracker their sample grades, and leaves graded demos alone", () => {
+    const fresh = demoProfile(new Date(2026, 9, 25));
+    const old = {
+      ...fresh,
+      progress: { [DEMO_CURRICULUM_ID]: { ...fresh.progress[DEMO_CURRICULUM_ID], completed: ["0102120", "0107101"], grades: {} } },
+    };
+    expect(withDemoGrades(old).progress[DEMO_CURRICULUM_ID].grades).toEqual({ "0102120": "A", "0107101": "B+" });
+    expect(withDemoGrades(fresh)).toBe(fresh);
   });
 
   it("warns when a custom next semester delays graduation", () => {

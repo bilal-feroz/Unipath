@@ -101,7 +101,10 @@ function Banners() {
             <FlaskConical aria-hidden className="size-4 text-plan" />
             <p className="flex-1 text-fg">
               <span className="font-semibold">Demo mode.</span>{" "}
-              <span className="text-muted">You&apos;re exploring a sample Software Engineering student. Changes stay in demo mode.</span>
+              <span className="text-muted sm:hidden">Sample student.</span>
+              <span className="hidden text-muted sm:inline">
+                You&apos;re exploring a sample Software Engineering student. Changes stay in demo mode.
+              </span>
             </p>
             <Link href="/start" className="font-semibold text-plan underline-offset-4 hover:underline">
               Start my own plan →

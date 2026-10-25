@@ -1,4 +1,4 @@
-import type { AiOutcome, AiProvider, AiTurn, SearchMode } from "./provider";
+import { retryAfterSeconds, type AiOutcome, type AiProvider, type AiTurn, type SearchMode } from "./provider";
 import type { CoachSource } from "./schema";
 
 /**
@@ -152,11 +152,16 @@ export async function callGroq({
       };
     }
     if (res.status === 429) {
+      const wait = retryAfterSeconds(res.headers.get("retry-after"), body.error?.message);
       return {
         ok: false,
         status: 429,
         error: "quota",
-        message: "The free AI quota is used up for now. Please try again in a little while.",
+        message:
+          wait !== undefined && wait > 60 * 60
+            ? "Today's free AI allowance for this site is used up. Please try again tomorrow."
+            : "The free AI allowance is busy right now. Please wait a moment and try again.",
+        retryAfterSeconds: wait ?? 30,
       };
     }
     return {
@@ -201,6 +206,9 @@ export function groqProvider({
     model: resolved,
     privacyUrl: "https://console.groq.com/docs/your-data",
     privacyNote: "Groq says it doesn't use API requests to train models.",
+    // Groq's free tier allows 30 requests a minute and 1,000 a day for gpt-oss-120b. A request can
+    // make two calls (when search falls back), so stay at half of that.
+    limits: { perMinute: 15, perDay: 450 },
     call: ({ system, turns, search }) => callGroq({ apiKey, model: resolved, system, turns, search, fetchImpl }),
   };
 }

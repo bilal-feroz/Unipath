@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { getCurriculum } from "@/lib/curriculum/registry";
-import { demoProfile } from "./demo";
+import { demoProfile, withDemoGrades } from "./demo";
 import { emptyProgress, emptyState, loadState, newProfile, saveState, type StorageLike } from "./persistence";
 import { STORAGE_KEY, type CurriculumProgress, type PersistedState, type Preferences, type Profile } from "./schema";
 
@@ -167,7 +167,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
 
   setPreferences: (partial) => set((s) => withActive(s, (p) => ({ ...p, preferences: { ...p.preferences, ...partial } }))),
 
-  enterDemo: () => set((s) => ({ demo: s.demo ?? demoProfile(), activeProfile: "demo" })),
+  enterDemo: () => set((s) => ({ demo: s.demo ? withDemoGrades(s.demo) : demoProfile(), activeProfile: "demo" })),
   resetDemo: () => set({ demo: demoProfile(), activeProfile: "demo" }),
   exitDemo: () => set({ activeProfile: "personal" }),
 
