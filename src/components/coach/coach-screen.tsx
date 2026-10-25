@@ -155,7 +155,7 @@ function ErrorPanel({ error }: { error: CoachError }) {
         <p className="font-semibold text-fg">{notSetUp ? "The AI coach isn't switched on yet" : "The coach couldn't answer"}</p>
         <p className="mt-0.5 text-muted">
           {notSetUp
-            ? "This site needs a free Google Gemini API key on its server before the coach can work. Everything else in UniPath works without it."
+            ? "This site needs a free AI API key (Groq or Google Gemini) on its server before the coach can work. Everything else in UniPath works without it."
             : error.message}
         </p>
       </div>
@@ -200,7 +200,7 @@ export function CoachScreen() {
       <PageHeader
         eyebrow="06 · AI Coach"
         title="Project ideas for you"
-        description="Portfolio projects that build on your courses and on what employers expect right now. Powered by Google Gemini with live web search."
+        description="Portfolio projects that build on your courses and on what employers expect right now, checked with a live web search."
       />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
@@ -256,16 +256,36 @@ export function CoachScreen() {
                 />
               </div>
 
-              <Button size="lg" className="w-full" onClick={() => coach.getIdeas(interests)} disabled={coach.loading !== null}>
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={() => coach.getIdeas(interests)}
+                disabled={coach.loading !== null || coach.status?.configured === false}
+              >
                 {coach.ideas ? <RefreshCw /> : <Sparkles />}
                 {coach.loading === "ideas" ? "Thinking…" : coach.ideas ? "Get new ideas" : "Get project ideas"}
               </Button>
 
-              <p className="flex gap-2 text-[12px] leading-relaxed text-dim">
-                <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-                Sends your major, course names and interests to Google Gemini — nothing else, and no name. On
-                Gemini&apos;s free tier, Google may use requests to improve its products.
-              </p>
+              {coach.status?.configured === false ? (
+                <p role="status" className="flex gap-2 text-[12.5px] leading-relaxed text-warn">
+                  <TriangleAlert aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+                  The AI coach isn&apos;t switched on for this site yet. Everything else in UniPath works without it.
+                </p>
+              ) : (
+                <p className="flex gap-2 text-[12px] leading-relaxed text-dim">
+                  <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+                  <span>
+                    Sends your major, course names and interests to {coach.status?.label ?? "the AI provider"}
+                    {coach.status?.model ? ` (${coach.status.model})` : ""} — nothing else, and no name.{" "}
+                    {coach.status?.privacyNote}{" "}
+                    {coach.status?.privacyUrl && (
+                      <a href={coach.status.privacyUrl} target="_blank" rel="noreferrer noopener" className="underline underline-offset-2 hover:text-fg">
+                        Their data policy
+                      </a>
+                    )}
+                  </span>
+                </p>
+              )}
             </CardBody>
           </Card>
         </div>
@@ -288,7 +308,11 @@ export function CoachScreen() {
               )}
               {coach.ideas.trends && (
                 <Card aria-labelledby="trends-title">
-                  <CardHeader titleId="trends-title" eyebrow="Right now" title="What employers expect" />
+                  <CardHeader
+                    titleId="trends-title"
+                    eyebrow={coach.ideas.searched ? "Right now" : "From the AI's own knowledge"}
+                    title="What employers expect"
+                  />
                   <CardBody>
                     <p className="flex gap-3 text-[15px] leading-relaxed text-fg">
                       <Lightbulb aria-hidden className="mt-1 size-5 shrink-0 text-warn" />
@@ -297,7 +321,7 @@ export function CoachScreen() {
                     {coach.ideas.sources.length > 0 && (
                       <div className="mt-4">
                         <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
-                          Found with Google Search
+                          Sources found with a web search
                         </p>
                         <Sources sources={coach.ideas.sources} />
                       </div>
@@ -310,9 +334,16 @@ export function CoachScreen() {
                   <IdeaCard key={idea.title} idea={idea} onAsk={(q) => submitQuestion(undefined, q)} />
                 ))}
               </div>
+              {!coach.ideas.searched && (
+                <p role="status" className="flex gap-2 rounded-xl border border-warn/30 bg-warn-soft px-4 py-2.5 text-sm text-fg">
+                  <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-warn" />
+                  These ideas didn&apos;t use a live web search (the free search allowance was busy), so they may be less
+                  current. Try again in a minute for up-to-date ideas.
+                </p>
+              )}
               <p className="text-[12px] text-dim">
-                Generated {new Date(coach.ideas.generatedAt).toLocaleString()} with {coach.ideas.model}. AI suggestions can be
-                wrong — check anything important. UniPath&apos;s course planning never comes from AI.
+                Generated {new Date(coach.ideas.generatedAt).toLocaleString()} by {coach.ideas.provider ?? "AI"} ({coach.ideas.model}). AI
+                suggestions can be wrong — check anything important. UniPath&apos;s course planning never comes from AI.
               </p>
 
               <Card aria-labelledby="chat-title">

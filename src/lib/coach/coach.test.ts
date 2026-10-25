@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { getCurriculum } from "@/lib/curriculum/registry";
-import { callGemini } from "./gemini";
+import { providerFromEnv } from "./config";
+import { callGemini, geminiProvider } from "./gemini";
+import { callGroq, stripCitationMarkers } from "./groq";
 import { handleCoachRequest } from "./handler";
 import { cleanAnswer, extractJson, normalizeIdeas, sourcesFrom } from "./parse";
 import { askPrompt, cleanText, ideasPrompt, studentContext } from "./prompt";
@@ -186,18 +188,18 @@ describe("POST /api/coach", () => {
   };
 
   it("explains when the AI isn't configured", async () => {
-    const res = await handleCoachRequest(post(body), { apiKey: undefined });
+    const res = await handleCoachRequest(post(body), { provider: null });
     expect(res.status).toBe(503);
     expect(await res.json()).toMatchObject({ error: "not_configured" });
   });
 
   it("rejects bad input before calling the AI", async () => {
     const fetchImpl = vi.fn();
-    const bad = await handleCoachRequest(post({ ...body, curriculumId: "nope" }), { apiKey: "k", fetchImpl });
+    const bad = await handleCoachRequest(post({ ...body, curriculumId: "nope" }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(bad.status).toBe(400);
-    const tooMany = await handleCoachRequest(post({ ...body, completed: Array(200).fill("x") }), { apiKey: "k", fetchImpl });
+    const tooMany = await handleCoachRequest(post({ ...body, completed: Array(200).fill("x") }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(tooMany.status).toBe(400);
-    const noQuestion = await handleCoachRequest(post({ ...body, mode: "ask" }), { apiKey: "k", fetchImpl });
+    const noQuestion = await handleCoachRequest(post({ ...body, mode: "ask" }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(noQuestion.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -205,14 +207,14 @@ describe("POST /api/coach", () => {
   it("returns validated ideas with sources, and caches identical requests", async () => {
     const fetchImpl = vi.fn(async () => geminiReply(IDEAS_JSON));
     const uniqueBody = { ...body, interests: `cache-test-${Math.random()}` };
-    const res = await handleCoachRequest(post(uniqueBody), { apiKey: "k", fetchImpl });
+    const res = await handleCoachRequest(post(uniqueBody), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.mode).toBe("ideas");
     expect(json.ideas[0].title).toBe("Study group finder");
     expect(json.ideas[0].buildsOn).toEqual(["0102221", "0102270"]);
     expect(json.sources).toEqual([{ title: "example.org", url: "https://example.org/report" }]);
-    await handleCoachRequest(post(uniqueBody), { apiKey: "k", fetchImpl });
+    await handleCoachRequest(post(uniqueBody), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -230,7 +232,7 @@ describe("POST /api/coach", () => {
           { role: "coach", text: "Hello!" },
         ],
       }),
-      { apiKey: "k", fetchImpl },
+      { provider: geminiProvider({ apiKey: "k", fetchImpl }) },
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ mode: "ask", answer: "Start with a small prototype." });
@@ -240,7 +242,7 @@ describe("POST /api/coach", () => {
 
   it("reports unreadable AI output", async () => {
     const fetchImpl = vi.fn(async () => geminiReply("Here are some ideas without JSON"));
-    const res = await handleCoachRequest(post({ ...body, interests: `x-${Math.random()}` }), { apiKey: "k", fetchImpl });
+    const res = await handleCoachRequest(post({ ...body, interests: `x-${Math.random()}` }), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
     expect(res.status).toBe(502);
     expect(await res.json()).toMatchObject({ error: "bad_output" });
   });
@@ -250,10 +252,130 @@ describe("POST /api/coach", () => {
     const ip = "rate-limit-test";
     const statuses: number[] = [];
     for (let i = 0; i < 9; i++) {
-      const res = await handleCoachRequest(post({ ...body, mode: "ask", question: `q${i}` }, ip), { apiKey: "k", fetchImpl });
+      const res = await handleCoachRequest(post({ ...body, mode: "ask", question: `q${i}` }, ip), { provider: geminiProvider({ apiKey: "k", fetchImpl }) });
       statuses.push(res.status);
     }
     expect(statuses.slice(0, 8).every((s) => s === 200)).toBe(true);
     expect(statuses[8]).toBe(429);
+  });
+});
+
+function groqReply(content: string, executedTools: unknown[] = []) {
+  return new Response(
+    JSON.stringify({
+      choices: [{ message: { role: "assistant", content, executed_tools: executedTools }, finish_reason: "stop" }],
+    }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  );
+}
+
+const SEARCH_TOOL = {
+  type: "search",
+  arguments: JSON.stringify({ query: "software engineering graduate skills" }),
+  search_results: {
+    results: [
+      { title: "Example report", url: "https://example.org/report" },
+      { title: "Duplicate", url: "https://example.org/report" },
+      { title: "Bad", url: "javascript:alert(1)" },
+    ],
+  },
+};
+
+describe("Groq client", () => {
+  it("calls the chat completions API with browser search and a bearer token", async () => {
+    const fetchImpl = vi.fn(async () => groqReply("Use tests【2†L6-L10】 and CI.", [SEARCH_TOOL]));
+    const out = await callGroq({
+      apiKey: "gk",
+      system: "sys",
+      turns: [
+        { role: "user", text: "hi" },
+        { role: "model", text: "hello" },
+        { role: "user", text: "ideas?" },
+      ],
+      search: "require",
+      fetchImpl,
+    });
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://api.groq.com/openai/v1/chat/completions");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer gk");
+    const body = JSON.parse(init.body as string);
+    expect(body.model).toBe("openai/gpt-oss-120b");
+    expect(body.tools).toEqual([{ type: "browser_search" }]);
+    expect(body.tool_choice).toBe("required");
+    expect(body.reasoning_effort).toBe("low");
+    expect(body.messages.map((m: { role: string }) => m.role)).toEqual(["system", "user", "assistant", "user"]);
+    expect(out).toEqual({
+      ok: true,
+      text: "Use tests and CI.",
+      sources: [{ title: "Example report", url: "https://example.org/report" }],
+      searchQueries: ["software engineering graduate skills"],
+      searched: true,
+    });
+  });
+
+  it("lets follow-up questions search only when useful", async () => {
+    const fetchImpl = vi.fn(async () => groqReply("Answer"));
+    const out = await callGroq({ apiKey: "gk", system: "s", turns: [{ role: "user", text: "q" }], search: "allow", fetchImpl });
+    const body = JSON.parse((fetchImpl.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+    expect(body.tool_choice).toBe("auto");
+    expect(out).toMatchObject({ ok: true, searched: false });
+  });
+
+  it("retries without search when the search request is too large for the free plan", async () => {
+    const replies = [
+      new Response(JSON.stringify({ error: { message: "Request too large for model: tokens per minute (TPM) limit 8000" } }), { status: 413 }),
+      groqReply("Ideas without search"),
+    ];
+    const fetchImpl = vi.fn(async () => replies.shift()!);
+    const out = await callGroq({ apiKey: "gk", system: "s", turns: [{ role: "user", text: "q" }], search: "require", fetchImpl });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    const second = JSON.parse((fetchImpl.mock.calls[1] as unknown as [string, RequestInit])[1].body as string);
+    expect(second.tools).toBeUndefined();
+    expect(out).toMatchObject({ ok: true, text: "Ideas without search", searched: false });
+  });
+
+  it("maps bad keys and quota errors", async () => {
+    const run = (res: Response) =>
+      callGroq({ apiKey: "gk", system: "s", turns: [{ role: "user", text: "q" }], search: "allow", fetchImpl: async () => res });
+    expect(await run(new Response(JSON.stringify({ error: { code: "invalid_api_key" } }), { status: 401 }))).toMatchObject({
+      ok: false,
+      error: "not_configured",
+    });
+    expect(await run(new Response(JSON.stringify({ error: { message: "requests per day" } }), { status: 429 }))).toMatchObject({
+      ok: false,
+      error: "quota",
+    });
+    expect(await run(groqReply(""))).toMatchObject({ ok: false, error: "bad_output" });
+  });
+
+  it("removes inline citation markers", () => {
+    expect(stripCitationMarkers("Fact【1†L2-L3】 here【4】.")).toBe("Fact here.");
+  });
+});
+
+describe("choosing the AI provider", () => {
+  it("prefers Groq, can be forced, and is off without keys", () => {
+    expect(providerFromEnv({})).toBeNull();
+    expect(providerFromEnv({ GEMINI_API_KEY: "g" })?.id).toBe("gemini");
+    expect(providerFromEnv({ GEMINI_API_KEY: "g", GROQ_API_KEY: "q" })?.id).toBe("groq");
+    expect(providerFromEnv({ GEMINI_API_KEY: "g", GROQ_API_KEY: "q", AI_PROVIDER: "gemini" })?.id).toBe("gemini");
+    expect(providerFromEnv({ GROQ_API_KEY: "q", GROQ_MODEL: "openai/gpt-oss-20b" })?.model).toBe("openai/gpt-oss-20b");
+    expect(providerFromEnv({ GROQ_API_KEY: "  " })).toBeNull();
+  });
+
+  it("returns Groq ideas through the full handler", async () => {
+    const fetchImpl = vi.fn(async () => groqReply(IDEAS_JSON, [SEARCH_TOOL]));
+    const provider = providerFromEnv({ GROQ_API_KEY: "q" }, fetchImpl);
+    const res = await handleCoachRequest(
+      post({ mode: "ideas", curriculumId: "aau-bsc-software-engineering", completed: ["0102221"], interests: `groq-${Math.random()}` }),
+      { provider },
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      provider: "Groq",
+      model: "openai/gpt-oss-120b",
+      searched: true,
+      ideas: [{ title: "Study group finder", buildsOn: ["0102221"] }],
+    });
   });
 });

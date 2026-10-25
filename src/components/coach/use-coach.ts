@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePlanContext } from "@/components/app-shell/plan-context";
+import type { CoachStatus } from "@/lib/coach/provider";
 import type { AskResponse, CoachError, CoachRequest, CoachSource, IdeasResponse } from "@/lib/coach/schema";
 import { useAppStore } from "@/lib/state/store";
 
@@ -60,6 +61,21 @@ export function useCoach() {
   const [loading, setLoading] = useState<"ideas" | "ask" | null>(null);
   const [error, setError] = useState<CoachError | null>(null);
   const [chat, setChat] = useState<ChatMessage[]>([]);
+  /** Which AI provider the server has (null while loading or if the check failed). */
+  const [status, setStatus] = useState<CoachStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/coach")
+      .then((r) => (r.ok ? (r.json() as Promise<CoachStatus>) : null))
+      .then((s) => {
+        if (!cancelled) setStatus(s);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const base = { curriculumId: plan.curriculum.id, completed, inProgress };
 
@@ -109,6 +125,7 @@ export function useCoach() {
   };
 
   return {
+    status,
     ideas: cached?.ideas ?? null,
     stale: !!cached && cached.fingerprint !== fingerprint,
     loading,

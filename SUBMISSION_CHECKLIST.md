@@ -14,7 +14,7 @@ Legend: ✅ done in the repository · ⬜ needs the team
 ## Optional
 
 - ✅ **Working deployment URL** — https://unipath-eight-peach.vercel.app (Vercel project `unipath`; redeploys automatically on every push to `main`)
-- ⬜ **AI Coach on the live site** — add a free `GEMINI_API_KEY` in Vercel → `unipath` → Settings → Environment Variables, then redeploy. Without it the coach shows a "not switched on yet" message.
+- ⬜ **AI Coach on the live site** — add a free `GROQ_API_KEY` (or `GEMINI_API_KEY`) in Vercel → `unipath` → Settings → Environment Variables, then redeploy. Without it the coach shows a "not switched on yet" message.
 - ⬜ **Team contributions** — fill in the table in README.md and `team` in `src/lib/site.ts` (shown in the footer).
 
 ## Before submitting

@@ -1,6 +1,6 @@
 import { getCurriculum } from "@/lib/curriculum/registry";
-import { callGemini, DEFAULT_GEMINI_MODEL, type GeminiTurn } from "./gemini";
 import { cleanAnswer, extractJson, normalizeIdeas } from "./parse";
+import type { AiProvider, AiTurn } from "./provider";
 import { askPrompt, cleanText, COACH_SYSTEM_PROMPT, ideasPrompt, studentContext } from "./prompt";
 import { createRateLimiter } from "./rate-limit";
 import { coachRequestSchema, type CoachError, type CoachErrorCode, type CoachResponse, type IdeasResponse } from "./schema";
@@ -17,9 +17,8 @@ function error(status: number, code: CoachErrorCode, message: string, headers: R
 }
 
 export interface HandlerEnv {
-  apiKey: string | undefined;
-  model?: string;
-  fetchImpl?: typeof fetch;
+  /** Null when no AI key is configured on the server. */
+  provider: AiProvider | null;
   now?: () => Date;
 }
 
@@ -39,14 +38,22 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
   const question = cleanText(req.question, 600);
   if (req.mode === "ask" && !question) return error(400, "bad_request", "Type a question first.");
 
-  if (!env.apiKey) {
-    return error(503, "not_configured", "The AI coach isn't set up on this server yet (no Gemini API key).");
+  const provider = env.provider;
+  if (!provider) {
+    return error(503, "not_configured", "The AI coach isn't set up on this server yet (no AI API key).");
   }
 
   const ctx = studentContext(curriculum, req);
   const cacheKey =
     req.mode === "ideas"
-      ? JSON.stringify([curriculum.id, [...ctx.completed.map((c) => c.code)].sort(), [...ctx.inProgress.map((c) => c.code)].sort(), ctx.interests])
+      ? JSON.stringify([
+          provider.id,
+          provider.model,
+          curriculum.id,
+          ctx.completed.map((c) => c.code).sort(),
+          ctx.inProgress.map((c) => c.code).sort(),
+          ctx.interests,
+        ])
       : null;
   const now = env.now?.() ?? new Date();
   if (cacheKey) {
@@ -65,8 +72,7 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
     return error(429, "quota", "The free AI quota for today is used up. Please try again tomorrow.");
   }
 
-  const model = env.model || DEFAULT_GEMINI_MODEL;
-  const turns: GeminiTurn[] = [];
+  const turns: AiTurn[] = [];
   if (req.mode === "ideas") {
     turns.push({ role: "user", text: ideasPrompt(ctx) });
   } else {
@@ -79,21 +85,32 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
     turns.push({ role: "user", text: askPrompt(ctx, question!, (req.ideaTitles ?? []).map((t) => cleanText(t, 140) ?? "").filter(Boolean)) });
   }
 
-  const result = await callGemini({ apiKey: env.apiKey, model, system: COACH_SYSTEM_PROMPT, turns, fetchImpl: env.fetchImpl });
+  const result = await provider.call({
+    system: COACH_SYSTEM_PROMPT,
+    turns,
+    search: req.mode === "ideas" ? "require" : "allow",
+  });
   if (!result.ok) return error(result.status, result.error, result.message);
+  const meta = {
+    sources: result.sources,
+    searchQueries: result.searchQueries,
+    searched: result.searched,
+    provider: provider.label,
+    model: provider.model,
+  };
 
   const generatedAt = now.toISOString();
   let response: CoachResponse;
   if (req.mode === "ideas") {
     const ideas = normalizeIdeas(extractJson(result.text), ctx.allowedCodes);
     if (!ideas) return error(502, "bad_output", "The AI's answer couldn't be read. Please try again.");
-    response = { mode: "ideas", ...ideas, sources: result.sources, searchQueries: result.searchQueries, model, generatedAt };
+    response = { mode: "ideas", ...ideas, ...meta, generatedAt };
     if (cacheKey) {
       if (ideasCache.size > 200) ideasCache.clear();
       ideasCache.set(cacheKey, { at: now.getTime(), value: response });
     }
   } else {
-    response = { mode: "ask", answer: cleanAnswer(result.text), sources: result.sources, searchQueries: result.searchQueries, model, generatedAt };
+    response = { mode: "ask", answer: cleanAnswer(result.text), ...meta, generatedAt };
   }
   return Response.json(response);
 }

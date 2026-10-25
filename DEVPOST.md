@@ -31,7 +31,7 @@ No sign-up, no API keys. Judges can click **Try Demo** and explore a sample stud
 - **Curriculum as data.** We transcribed three official study plans into JSON. Prerequisites use a tiny rule language (`0102221 & 0107200`, `(A & B) | D`, `credits>=75`, `[Department approval]`) parsed into expression trees. Every curriculum is validated with Zod plus custom checks (missing references, cycles, credit totals, impossible electives) before students can use it.
 - **A deterministic planning engine**, fully separate from the UI: eligibility, degree-requirement evaluation, a critical-path-first semester scheduler, elective "slots" so the app never picks electives for you, insights, and a what-if simulator that runs on copies of the input.
 - **Honest estimates.** Scheduling with prerequisites and credit caps is NP-hard in general, so the scheduler is a heuristic. It computes a lower bound (remaining credits vs. longest prerequisite chain) and only claims "no plan can finish sooner" when the plan matches that bound.
-- **An AI coach that can't make things up about your degree.** Google Gemini 2.5 Flash with Google Search grounding, called from a server route so the key never reaches the browser. The browser sends only course codes; the server looks up real course names and strips any course the AI mentions that the student hasn't taken. Rate limiting and caching keep it inside the free tier.
+- **An AI coach that can't make things up about your degree.** A free AI API with live web search (Groq's gpt-oss-120b with browser search, or Google Gemini 2.5 Flash with Google Search, behind one small provider interface), called from a server route so the key never reaches the browser. If the free search allowance is busy, it answers without searching and says so. The browser sends only course codes; the server looks up real course names and strips any course the AI mentions that the student hasn't taken. Rate limiting and caching keep it inside the free tier.
 - **Local-first storage:** versioned, validated `localStorage` with backups if saved data can't be read, export/import, and progress stored per major.
 - **Tests:** Vitest unit tests for the engine and data, Playwright end-to-end tests (including axe accessibility scans and a phone viewport).
 
@@ -63,11 +63,11 @@ No sign-up, no API keys. Judges can click **Try Demo** and explore a sample stud
 
 ## Built with
 
-Next.js, React, TypeScript, Tailwind CSS, Radix UI, Lucide, React Flow, dagre, Zod, Zustand, Sonner, Google Gemini API, Vitest, Playwright, axe-core.
+Next.js, React, TypeScript, Tailwind CSS, Radix UI, Lucide, React Flow, dagre, Zod, Zustand, Sonner, Groq API (gpt-oss-120b), Google Gemini API, Vitest, Playwright, axe-core.
 
 ## AI usage disclosure
 
-We used **Claude (Anthropic) via Claude Code** heavily: it wrote most of the code, tests and documentation from our specification and the official study plan PDFs we provided, and it transcribed the curricula, which we then **[TEAM — describe how you reviewed the data and code]**. At runtime, only the AI Coach uses AI (Google Gemini 2.5 Flash with Google Search); course rules, planning, simulations and GPA are all deterministic code.
+We used **Claude (Anthropic) via Claude Code** heavily: it wrote most of the code, tests and documentation from our specification and the official study plan PDFs we provided, and it transcribed the curricula, which we then **[TEAM — describe how you reviewed the data and code]**. At runtime, only the AI Coach uses AI (gpt-oss-120b on Groq with web search, or Google Gemini 2.5 Flash with Google Search); course rules, planning, simulations and GPA are all deterministic code.
 
 ## Links
 

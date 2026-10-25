@@ -5,6 +5,15 @@ async function openDemo(page: Page) {
   await expect(page).toHaveURL(/\/overview$/);
 }
 
+const STATUS = {
+  configured: true,
+  provider: "groq",
+  label: "Groq",
+  model: "openai/gpt-oss-120b",
+  privacyUrl: "https://console.groq.com/docs/your-data",
+  privacyNote: "Groq says it doesn't use API requests to train models.",
+};
+
 const IDEAS = {
   mode: "ideas",
   trends: "Employers expect automated testing, CI/CD and secure coding from new graduates.",
@@ -24,7 +33,9 @@ const IDEAS = {
   ],
   sources: [{ title: "example.org", url: "https://example.org/report" }],
   searchQueries: ["software engineering graduate skills"],
-  model: "gemini-2.5-flash",
+  searched: true,
+  provider: "Groq",
+  model: "openai/gpt-oss-120b",
   generatedAt: "2026-10-25T10:00:00.000Z",
 };
 
@@ -69,6 +80,7 @@ test.describe("AI coach", () => {
   test("shows project ideas with sources and answers a follow-up question", async ({ page }) => {
     const requests: Record<string, unknown>[] = [];
     await page.route("**/api/coach", async (route) => {
+      if (route.request().method() === "GET") return route.fulfill({ json: STATUS });
       const body = route.request().postDataJSON() as Record<string, unknown>;
       requests.push(body);
       if (body.mode === "ideas") return route.fulfill({ json: IDEAS });
@@ -78,7 +90,9 @@ test.describe("AI coach", () => {
           answer: "Start small:\n- Set up the repo\n- Write one **test** first",
           sources: [],
           searchQueries: [],
-          model: "gemini-2.5-flash",
+          searched: false,
+          provider: "Groq",
+          model: "openai/gpt-oss-120b",
           generatedAt: "2026-10-25T10:01:00.000Z",
         },
       });
@@ -87,6 +101,9 @@ test.describe("AI coach", () => {
     await openDemo(page);
     await page.getByRole("link", { name: /AI Coach/ }).first().click();
     await expect(page.getByRole("heading", { name: "Project ideas for you" })).toBeVisible();
+    // The privacy note names the provider the server actually uses.
+    await expect(page.getByText(/to Groq \(openai\/gpt-oss-120b\)/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Their data policy" })).toHaveAttribute("href", STATUS.privacyUrl);
     await page.getByLabel(/What are you into/).fill("web apps");
     await page.getByRole("button", { name: "Get project ideas" }).click();
 
@@ -111,13 +128,28 @@ test.describe("AI coach", () => {
     await expect(page.getByTestId("idea-card")).toHaveCount(1);
   });
 
-  test("explains when the AI isn't set up on the server", async ({ page }) => {
+  test("says so when an answer didn't use a live web search", async ({ page }) => {
     await page.route("**/api/coach", (route) =>
-      route.fulfill({ status: 503, json: { error: "not_configured", message: "No key." } }),
+      route.request().method() === "GET"
+        ? route.fulfill({ json: STATUS })
+        : route.fulfill({ json: { ...IDEAS, sources: [], searchQueries: [], searched: false } }),
     );
     await openDemo(page);
     await page.goto("/coach");
     await page.getByRole("button", { name: "Get project ideas" }).click();
-    await expect(page.getByText("The AI coach isn't switched on yet")).toBeVisible();
+    await expect(page.getByTestId("idea-card")).toHaveCount(1);
+    await expect(page.getByText(/didn.t use a live web search/)).toBeVisible();
+  });
+
+  test("explains when the AI isn't set up on the server", async ({ page }) => {
+    await page.route("**/api/coach", (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ json: { ...STATUS, configured: false, provider: null, label: null, model: null } })
+        : route.fulfill({ status: 503, json: { error: "not_configured", message: "No key." } }),
+    );
+    await openDemo(page);
+    await page.goto("/coach");
+    await expect(page.getByText(/isn.t switched on for this site yet/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Get project ideas" })).toBeDisabled();
   });
 });

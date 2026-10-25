@@ -52,12 +52,16 @@ Courses marked as taken this semester are stored separately from completed ones.
 The only server code and the only use of AI at runtime.
 
 ```
-browser (codes only) → POST /api/coach → zod validation → curriculum lookup → prompt → Gemini 2.5 Flash + Google Search
+browser (codes only) → POST /api/coach → zod validation → curriculum lookup → prompt → AiProvider.call()
+                                                                                     ↓
+                                              Groq gpt-oss-120b + browser_search  |  Gemini 2.5 Flash + Google Search
                                                                                      ↓
 browser ← normalized ideas / answer + web sources ← JSON extraction, code filtering, length caps
 ```
 
-- The key (`GEMINI_API_KEY`) is read only in the route handler; the handler itself (`src/lib/coach/handler.ts`) takes the key and `fetch` as parameters so it can be tested without a network.
+- **Providers** implement one interface (`src/lib/coach/provider.ts`): `call({ system, turns, search })` returns text, sources, search queries and whether a search actually ran. `config.ts` picks Groq when `GROQ_API_KEY` is set, otherwise Gemini when `GEMINI_API_KEY` is set; `AI_PROVIDER` forces one.
+- **Groq specifics** (`groq.ts`): OpenAI-compatible chat completions with the built-in `browser_search` tool (`tool_choice: "required"` for ideas, `"auto"` for questions). Browser search can't be combined with structured outputs, so JSON is requested in the prompt and parsed like Gemini's; inline citation markers (`【…】`) are stripped. If a search request is too large for the free tier's tokens-per-minute limit, it retries once without the tool and reports `searched: false`, which the page shows.
+- The key is read only in the route handler; the handler itself (`src/lib/coach/handler.ts`) takes a provider object (built with an injectable `fetch`) so it can be tested without a network. `GET /api/coach` returns the provider's name, model and privacy link, never the key.
 - The prompt is built from course titles the server looks up, so a client can't inject arbitrary "courses". Free text (interests, questions) is length-limited and stripped of control characters.
 - Output is parsed leniently (fences, stray prose) and normalized; `buildsOn` keeps only codes from the student's own list; sources keep only http(s) links. React escapes all text.
 - Free-tier protection: per-visitor sliding-window limit, a per-instance daily cap, and a 30-minute cache of identical idea requests; the browser keeps the last ideas in localStorage.

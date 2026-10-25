@@ -150,8 +150,10 @@ export default function AboutPage() {
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                It uses Google&apos;s <strong className="text-fg">Gemini 2.5 Flash</strong> with Google Search, so it can look up
-                current industry practice. Its answers list the web sources it found.
+                It uses a free AI API with live web search, so it can look up current industry practice: Groq&apos;s{" "}
+                <strong className="text-fg">gpt-oss-120b</strong> or Google&apos;s <strong className="text-fg">Gemini 2.5 Flash</strong>,
+                depending on how the site is set up. The coach page names the one in use, and its answers list the web
+                sources it found (or say so when it couldn&apos;t search).
               </li>
               <li>
                 Only course codes go from your browser to UniPath&apos;s server; the server looks up the course names, so the AI
@@ -184,9 +186,10 @@ export default function AboutPage() {
             </p>
             <p>
               The one exception is the AI Coach, and only when you press a button there: it sends your major, the course
-              codes you&apos;ve completed or are taking, and anything you type (interests, questions) to Google Gemini. Your
-              grades, name and saved file are never sent. On Gemini&apos;s free tier, Google may use these requests to improve
-              its products.
+              codes you&apos;ve completed or are taking, and anything you type (interests, questions) to the AI provider named
+              on that page (Groq or Google Gemini). Your grades, name and saved file are never sent. Groq says it
+              doesn&apos;t use API requests to train models; on Gemini&apos;s free tier, Google may use requests to improve its
+              products.
             </p>
           </Section>
         </div>

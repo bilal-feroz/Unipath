@@ -1,5 +1,5 @@
 import { sourcesFrom } from "./parse";
-import type { CoachErrorCode, CoachSource } from "./schema";
+import type { AiOutcome, AiProvider, AiTurn } from "./provider";
 
 /**
  * Calls Google's Gemini API (generateContent) with Google Search grounding.
@@ -8,15 +8,6 @@ import type { CoachErrorCode, CoachSource } from "./schema";
 
 export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
-
-export interface GeminiTurn {
-  role: "user" | "model";
-  text: string;
-}
-
-export type GeminiOutcome =
-  | { ok: true; text: string; sources: CoachSource[]; searchQueries: string[] }
-  | { ok: false; status: number; error: CoachErrorCode; message: string };
 
 interface GeminiResponseBody {
   candidates?: {
@@ -44,10 +35,10 @@ export async function callGemini({
   apiKey: string;
   model?: string;
   system: string;
-  turns: GeminiTurn[];
+  turns: AiTurn[];
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
-}): Promise<GeminiOutcome> {
+}): Promise<AiOutcome> {
   let res: Response;
   try {
     res = await fetchImpl(`${ENDPOINT}/${encodeURIComponent(model)}:generateContent`, {
@@ -106,10 +97,28 @@ export async function callGemini({
   if (!text) {
     return { ok: false, status: 502, error: "bad_output", message: "The AI sent an empty answer. Please try again." };
   }
+  const searchQueries = (candidate?.groundingMetadata?.webSearchQueries ?? []).slice(0, 6);
+  const sources = sourcesFrom(candidate?.groundingMetadata?.groundingChunks);
+  return { ok: true, text, sources, searchQueries, searched: sources.length > 0 || searchQueries.length > 0 };
+}
+
+export function geminiProvider({
+  apiKey,
+  model,
+  fetchImpl,
+}: {
+  apiKey: string;
+  model?: string;
+  fetchImpl?: typeof fetch;
+}): AiProvider {
+  const resolved = model || DEFAULT_GEMINI_MODEL;
   return {
-    ok: true,
-    text,
-    sources: sourcesFrom(candidate?.groundingMetadata?.groundingChunks),
-    searchQueries: (candidate?.groundingMetadata?.webSearchQueries ?? []).slice(0, 6),
+    id: "gemini",
+    label: "Google Gemini",
+    model: resolved,
+    privacyUrl: "https://ai.google.dev/gemini-api/terms",
+    privacyNote: "On Gemini's free tier, Google may use requests to improve its products.",
+    // Gemini decides for itself when to search; the Google Search tool is always offered.
+    call: ({ system, turns }) => callGemini({ apiKey, model: resolved, system, turns, fetchImpl }),
   };
 }

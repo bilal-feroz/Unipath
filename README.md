@@ -4,7 +4,7 @@
 
 UniPath turns a university's static study plan into a personal, interactive roadmap. Pick your major, tick the courses you've finished, and UniPath shows how far you are from graduating, what you can take next semester, what's blocking you, and how choices like a lighter workload or a postponed course change your graduation date.
 
-Built for **NextSpark Hacks 2026**. No account and no paid services. Planning runs entirely in the browser; the optional AI Coach uses Google Gemini's free tier.
+Built for **NextSpark Hacks 2026**. No account and no paid services. Planning runs entirely in the browser; the optional AI Coach uses a free AI API (Groq, or Google Gemini).
 
 **Live demo: https://unipath-eight-peach.vercel.app** — click **Try Demo** to explore a sample student.
 
@@ -57,8 +57,9 @@ All planning is deterministic and lives in [`src/lib/engine`](src/lib/engine), s
 
 The coach is the only part of UniPath that uses AI, and it never touches planning rules. It lives in [`src/lib/coach`](src/lib/coach) and the route handler `src/app/api/coach/route.ts`:
 
-- **Model:** Google **Gemini 2.5 Flash** through the `generateContent` REST API with the **Google Search** tool, so answers reflect current practice and come with web sources. (Gemini 2.5 Flash is the model whose free tier includes search grounding.)
-- **Key stays on the server:** `GEMINI_API_KEY` is read only by the route handler; the browser never sees it.
+- **Model:** whichever free key the server has. With `GROQ_API_KEY` it uses **Groq** running **`openai/gpt-oss-120b`** with Groq's built-in **browser search** tool; with `GEMINI_API_KEY` it uses Google **Gemini 2.5 Flash** with the **Google Search** tool (the Gemini model whose free tier includes search). Either way, answers reflect current practice and come with web sources. Both providers sit behind one small interface ([`provider.ts`](src/lib/coach/provider.ts)), so adding another is one file.
+- **Honest about search:** if the free search allowance is busy (Groq's free tier has a tokens-per-minute limit), the coach answers once more without searching and the page says so, instead of failing.
+- **Key stays on the server:** the key is read only by the route handler; the browser never sees it. `GET /api/coach` tells the page which provider and model are in use (never the key), so the privacy note names them and links their data policy.
 - **Grounded in real courses:** the browser sends only course codes; the server validates them against the curriculum, looks up the titles itself, and removes any course the AI mentions that isn't in the student's list.
 - **Checked output:** the answer is parsed and normalized before it's shown; unreadable answers produce a clear error instead of broken UI.
 - **Protects the free quota:** per-visitor rate limiting, a daily cap per server instance, and a 30-minute cache for identical requests. The browser also remembers the last ideas.
@@ -91,7 +92,7 @@ No planning or UI code needs to change.
 
 ## Tech stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Radix UI primitives · Lucide icons · React Flow (`@xyflow/react`) + dagre for the degree map · Zod for data and saved-state validation · Zustand for state · Sonner for toasts · Google Gemini API (AI Coach) · Vitest · Playwright + axe-core.
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Radix UI primitives · Lucide icons · React Flow (`@xyflow/react`) + dagre for the degree map · Zod for data and saved-state validation · Zustand for state · Sonner for toasts · Groq API or Google Gemini API (AI Coach) · Vitest · Playwright + axe-core.
 
 ## Getting started
 
@@ -108,14 +109,15 @@ Open http://localhost:3000. Click **Try Demo** for a pre-filled sample student, 
 
 Everything except the AI Coach works without any key.
 
-1. Create a free API key at [Google AI Studio](https://aistudio.google.com/apikey).
+1. Create a free API key at [Groq](https://console.groq.com/keys) (recommended) or [Google AI Studio](https://aistudio.google.com/apikey).
 2. Add it to `.env.local` in the project folder (see `.env.example`):
    ```
-   GEMINI_API_KEY=your-key-here
+   GROQ_API_KEY=your-key-here
    ```
+   or `GEMINI_API_KEY=your-key-here`. If both are set, Groq is used unless `AI_PROVIDER=gemini`.
 3. Restart `npm run dev`.
 
-On Gemini's free tier, Google may use requests to improve its products. UniPath only sends the major, course names, and what the student types into the coach.
+UniPath only sends the major, course names, and what the student types into the coach. [Groq says](https://console.groq.com/docs/your-data) it doesn't use API requests to train models; on Gemini's free tier, Google may use requests to improve its products.
 
 ### Commands
 
@@ -131,10 +133,10 @@ On Gemini's free tier, Google may use requests to improve its products. UniPath 
 
 ## Deployment
 
-UniPath is a standard Next.js app with no database. The only server code is the AI Coach route, which needs one environment variable, `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default `gemini-2.5-flash`). Without it, the coach shows a "not switched on yet" message and everything else works.
+UniPath is a standard Next.js app with no database. The only server code is the AI Coach route, which needs one environment variable: `GROQ_API_KEY` (optional `GROQ_MODEL`, default `openai/gpt-oss-120b`) or `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default `gemini-2.5-flash`). Without one, the coach shows a "not switched on yet" message and everything else works.
 
 - **Vercel (free Hobby plan):** the live site at https://unipath-eight-peach.vercel.app is the Vercel project `unipath`, connected to this GitHub repository — every push to `main` redeploys it automatically. To set up your own copy, import the repository at vercel.com/new and keep the detected Next.js settings.
-- **AI Coach on Vercel:** in the Vercel dashboard open the `unipath` project → **Settings → Environment Variables**, add `GEMINI_API_KEY` for Production (and Preview if you like), then redeploy (or push any commit).
+- **AI Coach on Vercel:** in the Vercel dashboard open the `unipath` project → **Settings → Environment Variables**, add `GROQ_API_KEY` (or `GEMINI_API_KEY`) for Production (and Preview if you like), then redeploy (or push any commit).
 - **Anywhere else:** `npm run build && npm start` on Node 20.9+.
 
 ## Saving and privacy
@@ -149,7 +151,7 @@ The AI Coach sends data only when the student presses a button on that page: the
 - Graduation estimates assume courses are offered when planned and passed on the first attempt (except in "retake" simulations).
 - The GPA only includes courses the student has passed; failed attempts and repeats (which also count in an official CGPA) aren't tracked, and academic warning/probation rules aren't modelled.
 - Transfer credit and equivalencies aren't tracked. Department approvals are shown but not checked.
-- AI Coach suggestions can be wrong or out of date, and the free Gemini tier has daily limits.
+- AI Coach suggestions can be wrong or out of date, and the free Groq and Gemini tiers have per-minute and daily limits.
 - Summer credit limits and maximum loads are user settings — check your university's rules.
 - Only Al Ain University's Software Engineering, Computer Science and Cybersecurity plans are loaded.
 - Transcription errors are possible.
@@ -164,7 +166,7 @@ src/
   lib/curriculum/         types, schema, prerequisite parser, validation, registry
   lib/engine/             progress, eligibility, targets, scheduler, insights, simulation, terms
   lib/gpa/                grading scales and CGPA calculation
-  lib/coach/              AI coach: request schema, prompts, Gemini client, output parsing, rate limiting
+  lib/coach/              AI coach: request schema, prompts, Groq and Gemini clients, output parsing, rate limiting
   lib/state/              persisted-state schema, persistence, demo student, store
   lib/plan.ts             derives everything a screen needs from saved progress
 e2e/                      Playwright tests
@@ -182,6 +184,6 @@ docs/ARCHITECTURE.md      design decisions
 
 This project was built with substantial help from **Claude (Anthropic)** via Claude Code, which wrote most of the code, tests and documentation from the team's specification and the official study plan PDFs the team supplied. The team directed the work, chose the scope, and is responsible for reviewing it.
 
-At runtime, only the **AI Coach** page uses AI (Google Gemini 2.5 Flash with Google Search). Course eligibility, next-semester recommendations, graduation estimates, simulations and GPA all come from deterministic code.
+At runtime, only the **AI Coach** page uses AI (Groq's `gpt-oss-120b` with browser search, or Google Gemini 2.5 Flash with Google Search). Course eligibility, next-semester recommendations, graduation estimates, simulations and GPA all come from deterministic code.
 
 See [CREDITS.md](CREDITS.md) for all libraries and sources.

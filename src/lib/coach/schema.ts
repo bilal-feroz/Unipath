@@ -46,6 +46,10 @@ export interface IdeasResponse {
   ideas: ProjectIdea[];
   sources: CoachSource[];
   searchQueries: string[];
+  /** Whether a live web search was actually used for this answer. */
+  searched: boolean;
+  /** Provider name, e.g. "Groq". */
+  provider: string;
   model: string;
   generatedAt: string;
 }
@@ -55,6 +59,8 @@ export interface AskResponse {
   answer: string;
   sources: CoachSource[];
   searchQueries: string[];
+  searched: boolean;
+  provider: string;
   model: string;
   generatedAt: string;
 }
