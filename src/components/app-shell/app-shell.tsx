@@ -1,40 +1,71 @@
 "use client";
 
-import { FlaskConical, Info, X } from "lucide-react";
+import { ChevronDown, FlaskConical, Info, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { BrowserOnly } from "@/components/browser-only";
 import { Logo } from "@/components/logo";
+import { NotificationBell } from "@/components/schedule/notification-bell";
+import { ScheduleProvider } from "@/components/schedule/schedule-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePlan } from "@/lib/state/use-plan";
 import { useAppStore } from "@/lib/state/store";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS } from "./nav";
+import { groupIsActive, isActive, MOBILE_TABS, NAV_GROUPS } from "./nav";
 import { PlanProvider } from "./plan-context";
 import { SettingsMenu } from "./settings-menu";
+
+const topItem = "relative flex h-[60px] items-center gap-1 whitespace-nowrap px-3 text-[14px] transition-colors xl:px-3.5";
+
+function ActiveBar() {
+  return <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent" />;
+}
 
 function DesktopNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Main" className="hidden items-center md:flex">
-      {NAV_ITEMS.map((item) => {
-        const active = pathname.startsWith(item.href);
+    <nav aria-label="Main" className="hidden items-center lg:flex">
+      {NAV_GROUPS.map((group) => {
+        const active = groupIsActive(pathname, group);
+        if (group.href) {
+          return (
+            <Link
+              key={group.id}
+              href={group.href}
+              aria-current={active ? "page" : undefined}
+              aria-label={group.label === group.short ? undefined : group.label}
+              className={cn(topItem, active ? "font-medium text-fg" : "text-muted hover:text-fg")}
+            >
+              {group.short}
+              {active && <ActiveBar />}
+            </Link>
+          );
+        }
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            aria-label={item.label === item.short ? undefined : item.label}
-            className={cn(
-              "relative flex h-[60px] items-center whitespace-nowrap px-3 text-[14px] transition-colors lg:px-4",
-              active ? "font-medium text-fg" : "text-muted hover:text-fg",
-            )}
-          >
-            {item.short}
-            {active && <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent lg:inset-x-4" />}
-          </Link>
+          <DropdownMenu key={group.id}>
+            <DropdownMenuTrigger className={cn(topItem, "outline-none", active ? "font-medium text-fg" : "text-muted hover:text-fg data-[state=open]:text-fg")}>
+              {group.label}
+              <ChevronDown aria-hidden className="size-3.5 opacity-70" />
+              {active && <ActiveBar />}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-[220px]">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const here = isActive(pathname, item.href);
+                return (
+                  <DropdownMenuItem key={item.href} asChild className={here ? "font-medium text-accent [&_svg]:!text-accent" : undefined}>
+                    <Link href={item.href} aria-current={here ? "page" : undefined}>
+                      <Icon /> {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       })}
     </nav>
@@ -43,22 +74,25 @@ function DesktopNav() {
 
 function MobileNav() {
   const pathname = usePathname();
+  const [more, setMore] = useState(false);
+  const inTabs = MOBILE_TABS.some((t) => isActive(pathname, t.href));
   return (
     <nav
       aria-label="Main"
-      className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <ul className="grid grid-cols-6">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname.startsWith(item.href);
+      <ul className="grid grid-cols-5">
+        {MOBILE_TABS.map((item) => {
+          const active = isActive(pathname, item.href);
           const Icon = item.icon;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                aria-label={item.label === item.short ? undefined : item.label}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-[10.5px] font-medium",
+                  "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium",
                   active ? "text-accent" : "text-muted",
                 )}
               >
@@ -68,7 +102,54 @@ function MobileNav() {
             </li>
           );
         })}
+        <li>
+          <button
+            type="button"
+            onClick={() => setMore(true)}
+            aria-haspopup="dialog"
+            className={cn("flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium", !inTabs ? "text-accent" : "text-muted")}
+          >
+            <Menu aria-hidden className="size-5" />
+            More
+          </button>
+        </li>
       </ul>
+      <Dialog open={more} onOpenChange={setMore}>
+        <DialogContent title="Everything in UniPath" side="right">
+          <div className="space-y-5 pb-2">
+            {NAV_GROUPS.map((group) => {
+              const items = group.href ? [{ href: group.href, label: group.label, short: group.short, icon: group.icon }] : group.items;
+              return (
+                <section key={group.id}>
+                  {!group.href && <h3 className="mb-1.5 text-[12.5px] font-medium text-muted">{group.label}</h3>}
+                  <ul className="space-y-1">
+                    {items.map((item) => {
+                      const Icon = item.icon;
+                      const here = isActive(pathname, item.href);
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setMore(false)}
+                            aria-current={here ? "page" : undefined}
+                            className={cn(
+                              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px]",
+                              here ? "bg-accent-soft font-medium text-fg" : "text-fg hover:bg-surface-2",
+                            )}
+                          >
+                            <Icon aria-hidden className={cn("size-5", here ? "text-accent" : "text-muted")} />
+                            {item.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
@@ -141,7 +222,7 @@ function ShellFrame({ right, children }: { right?: ReactNode; children: ReactNod
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="glass-bar sticky top-0 z-40 border-b border-line">
-        <div className="mx-auto grid h-[60px] max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr]">
+        <div className="mx-auto grid h-[60px] max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[auto_1fr_auto] lg:[&>nav]:justify-center">
           <Logo href="/overview" />
           <DesktopNav />
           <div className="flex items-center justify-end gap-2">
@@ -169,13 +250,22 @@ function ShellContent({ children }: { children: ReactNode }) {
   }
   return (
     <PlanProvider plan={plan}>
-      <ShellFrame right={<SettingsMenu />}>
-        <Banners />
-        <main id="main" className="flex-1 pb-24 md:pb-12">
-          {children}
-        </main>
-        <MobileNav />
-      </ShellFrame>
+      <ScheduleProvider>
+        <ShellFrame
+          right={
+            <>
+              <NotificationBell />
+              <SettingsMenu />
+            </>
+          }
+        >
+          <Banners />
+          <main id="main" className="flex-1 pb-24 lg:pb-12">
+            {children}
+          </main>
+          <MobileNav />
+        </ShellFrame>
+      </ScheduleProvider>
     </PlanProvider>
   );
 }

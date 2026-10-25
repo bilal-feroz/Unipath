@@ -1,11 +1,9 @@
 import { getCurriculum } from "@/lib/curriculum/registry";
 import { cleanAnswer, extractJson, normalizeIdeas } from "./parse";
-import { createCoachGuard, type CoachGuard } from "./guard";
+import { sharedGuard, visitorId, type CoachGuard } from "./guard";
 import type { AiProvider, AiTurn } from "./provider";
 import { askPrompt, cleanText, COACH_SYSTEM_PROMPT, ideasPrompt, studentContext } from "./prompt";
 import { coachRequestSchema, type CoachError, type CoachErrorCode, type CoachResponse, type IdeasResponse } from "./schema";
-
-const sharedGuard = createCoachGuard();
 
 const ideasCache = new Map<string, { at: number; value: IdeasResponse }>();
 const CACHE_MS = 30 * 60_000;
@@ -15,15 +13,6 @@ function error(status: number, code: CoachErrorCode, message: string, retryAfter
     status,
     headers: retryAfterSeconds ? { "Retry-After": String(retryAfterSeconds) } : undefined,
   });
-}
-
-/** Vercel sets x-real-ip and x-forwarded-for itself, so visitors can't choose their own. */
-function visitorId(request: Request): string {
-  return (
-    request.headers.get("x-real-ip")?.trim() ||
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "local"
-  );
 }
 
 export interface HandlerEnv {

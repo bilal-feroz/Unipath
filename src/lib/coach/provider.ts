@@ -12,7 +12,8 @@ export type AiOutcome =
 
 export type ProviderId = "groq" | "gemini";
 
-export type SearchMode = "require" | "allow";
+/** "require": search first. "allow": search if useful. "off": never search (e.g. reading a document). */
+export type SearchMode = "require" | "allow" | "off";
 
 /** A configured AI provider. Built on the server from environment variables; never sent to the browser. */
 export interface AiProvider {

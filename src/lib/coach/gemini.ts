@@ -1,5 +1,5 @@
 import { sourcesFrom } from "./parse";
-import { retryAfterSeconds, type AiOutcome, type AiProvider, type AiTurn } from "./provider";
+import { retryAfterSeconds, type AiOutcome, type AiProvider, type AiTurn, type SearchMode } from "./provider";
 
 /**
  * Calls Google's Gemini API (generateContent) with Google Search grounding.
@@ -29,6 +29,7 @@ export async function callGemini({
   model = DEFAULT_GEMINI_MODEL,
   system,
   turns,
+  search = "allow",
   fetchImpl = fetch,
   timeoutMs = 50_000,
 }: {
@@ -36,6 +37,7 @@ export async function callGemini({
   model?: string;
   system: string;
   turns: AiTurn[];
+  search?: SearchMode;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
 }): Promise<AiOutcome> {
@@ -47,7 +49,7 @@ export async function callGemini({
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents: turns.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
-        tools: [{ googleSearch: {} }],
+        ...(search === "off" ? {} : { tools: [{ googleSearch: {} }] }),
         generationConfig: { maxOutputTokens: 8192, temperature: 0.7 },
       }),
       signal: AbortSignal.timeout(timeoutMs),
@@ -126,7 +128,7 @@ export function geminiProvider({
     privacyNote: "On Gemini's free tier, Google may use requests to improve its products.",
     // Under Gemini 2.5 Flash's free tier (10 requests a minute, 250 a day).
     limits: { perMinute: 8, perDay: 200 },
-    // Gemini decides for itself when to search; the Google Search tool is always offered.
-    call: ({ system, turns }) => callGemini({ apiKey, model: resolved, system, turns, fetchImpl }),
+    // Gemini decides for itself when to search; the Google Search tool is offered unless search is off.
+    call: ({ system, turns, search }) => callGemini({ apiKey, model: resolved, system, turns, search, fetchImpl }),
   };
 }

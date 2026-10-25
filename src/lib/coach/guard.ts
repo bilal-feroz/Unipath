@@ -9,7 +9,13 @@ const DAY = 24 * 60 * MINUTE;
  * How often one visitor (one IP address) may use the coach. Cached answers don't count. The limits are
  * generous enough for a room of students sharing one campus network.
  */
-export const VISITOR_LIMITS: Record<"ideas" | "ask", RateWindow[]> = {
+export type GuardMode = "ideas" | "ask" | "extract";
+
+export const VISITOR_LIMITS: Record<GuardMode, RateWindow[]> = {
+  extract: [
+    { limit: 5, windowMs: 10 * MINUTE },
+    { limit: 20, windowMs: DAY },
+  ],
   ideas: [
     { limit: 4, windowMs: 10 * MINUTE },
     { limit: 15, windowMs: DAY },
@@ -41,6 +47,7 @@ export function createCoachGuard() {
   const visitorLimits = {
     ideas: createRateLimiter(VISITOR_LIMITS.ideas),
     ask: createRateLimiter(VISITOR_LIMITS.ask),
+    extract: createRateLimiter(VISITOR_LIMITS.extract),
   };
   const visitorRunning = createConcurrencyLimiter(1);
   const serverRunning = createConcurrencyLimiter(MAX_PARALLEL);
@@ -61,7 +68,7 @@ export function createCoachGuard() {
   };
 
   return {
-    admit({ visitor, mode, provider, now }: { visitor: string; mode: "ideas" | "ask"; provider: AiProvider; now: number }): GuardResult {
+    admit({ visitor, mode, provider, now }: { visitor: string; mode: GuardMode; provider: AiProvider; now: number }): GuardResult {
       if (now < pausedUntil) {
         return reject("quota", "The free AI service asked UniPath to slow down. Please wait a moment and try again.", (pausedUntil - now) / 1000);
       }
@@ -76,7 +83,9 @@ export function createCoachGuard() {
             ? "You've reached today's limit for the coach. Please come back tomorrow."
             : mode === "ideas"
               ? "That's a lot of new ideas in a short time! Please wait a little before asking for more."
-              : "That's a lot of questions in a short time! Please wait a little before asking more.",
+              : mode === "extract"
+                ? "That's a lot of documents in a short time. Please wait a little, or use the offline reader."
+                : "That's a lot of questions in a short time! Please wait a little before asking more.",
           own.retryAfterSeconds,
         );
       }
@@ -118,3 +127,15 @@ export function createCoachGuard() {
 }
 
 export type CoachGuard = ReturnType<typeof createCoachGuard>;
+
+/** One guard for every AI feature on this server instance, so their limits add up. */
+export const sharedGuard = createCoachGuard();
+
+/** Vercel sets x-real-ip and x-forwarded-for itself, so visitors can't choose their own. */
+export function visitorId(request: Request): string {
+  return (
+    request.headers.get("x-real-ip")?.trim() ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "local"
+  );
+}

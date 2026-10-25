@@ -41,10 +41,13 @@ export function taskProgress(task: Task): number {
 
 function urgency(hoursLeft: number): number {
   if (hoursLeft < 0) return 100;
+  if (hoursLeft <= 12) return 95;
   if (hoursLeft <= 24) return 90;
+  if (hoursLeft <= 36) return 82;
   if (hoursLeft <= 48) return 75;
-  if (hoursLeft <= 72) return 60;
-  if (hoursLeft <= 7 * 24) return 40;
+  if (hoursLeft <= 72) return 62;
+  if (hoursLeft <= 5 * 24) return 48;
+  if (hoursLeft <= 7 * 24) return 38;
   if (hoursLeft <= 14 * 24) return 20;
   return 8;
 }
@@ -76,7 +79,8 @@ export function rankTask(task: Task, now: ZonedNow, busyDays: ReadonlySet<DateSt
     score += 15;
     why.push(`About ${task.effortHours} h of work left`);
   }
-  score *= 0.4 + 0.6 * (1 - progress / 100);
+  // Work already done lowers the urgency, but a deadline is still a deadline.
+  score *= 0.6 + 0.4 * (1 - progress / 100);
   if (busyDays.has(task.dueDate)) {
     score += 8;
     why.push("Other deadlines the same day");

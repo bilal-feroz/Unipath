@@ -67,7 +67,7 @@ async function request(
   model: string,
   system: string,
   turns: AiTurn[],
-  search: SearchMode | "off",
+  search: SearchMode,
   fetchImpl: typeof fetch,
   timeoutMs: number,
 ): Promise<{ res: Response; body: GroqResponseBody } | null> {
@@ -129,10 +129,10 @@ export async function callGroq({
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
 }): Promise<AiOutcome> {
-  let searchUsed = true;
+  let searchUsed = search !== "off";
   let attempt = await request(apiKey, model, system, turns, search, fetchImpl, timeoutMs);
   // Live search adds a lot of tokens, which can exceed the free plan's per-minute limit. Retry once without it.
-  if (attempt && !attempt.res.ok && searchCouldBeTheProblem(attempt.res.status, attempt.body)) {
+  if (searchUsed && attempt && !attempt.res.ok && searchCouldBeTheProblem(attempt.res.status, attempt.body)) {
     searchUsed = false;
     attempt = await request(apiKey, model, system, turns, "off", fetchImpl, timeoutMs);
   }
