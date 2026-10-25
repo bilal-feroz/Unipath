@@ -478,6 +478,9 @@ describe("choosing the AI provider", () => {
     expect(providerFromEnv({ GEMINI_API_KEY: "g", GROQ_API_KEY: "q", AI_PROVIDER: "gemini" })?.id).toBe("gemini");
     expect(providerFromEnv({ GROQ_API_KEY: "q", GROQ_MODEL: "openai/gpt-oss-20b" })?.model).toBe("openai/gpt-oss-20b");
     expect(providerFromEnv({ GROQ_API_KEY: "  " })).toBeNull();
+    // A Groq key saved under another variable name is still found, and only real-looking keys count.
+    expect(providerFromEnv({ Unipath: "gsk_abcdefghijklmnopqrstuvwxyz123456" })?.id).toBe("groq");
+    expect(providerFromEnv({ NOTE: "gsk_short", OTHER: "hello" })).toBeNull();
   });
 
   it("returns Groq ideas through the full handler", async () => {

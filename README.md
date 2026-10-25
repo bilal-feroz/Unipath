@@ -114,7 +114,7 @@ Everything except the AI Coach works without any key.
    ```
    GROQ_API_KEY=your-key-here
    ```
-   or `GEMINI_API_KEY=your-key-here`. If both are set, Groq is used unless `AI_PROVIDER=gemini`.
+   or `GEMINI_API_KEY=your-key-here`. If both are set, Groq is used unless `AI_PROVIDER=gemini`. (A Groq key saved under a different variable name is still found, because Groq keys start with `gsk_`.)
 3. Restart `npm run dev`.
 
 UniPath only sends the major, course names, and what the student types into the coach. [Groq says](https://console.groq.com/docs/your-data) it doesn't use API requests to train models; on Gemini's free tier, Google may use requests to improve its products.
