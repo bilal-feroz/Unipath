@@ -76,6 +76,9 @@ export function SettingsMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel>Plan</DropdownMenuLabel>
+          <DropdownMenuItem onSelect={() => router.push("/settings")}>
+            <Settings /> Reminders and rules
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setOpen("settings")}>
             <SlidersHorizontal /> Planning settings
           </DropdownMenuItem>

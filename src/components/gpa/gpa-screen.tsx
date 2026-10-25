@@ -12,6 +12,8 @@ import { getUniversity } from "@/lib/curriculum/registry";
 import type { GradingScale } from "@/lib/gpa/scales";
 import { useAppStore } from "@/lib/state/store";
 import { cn, plural } from "@/lib/utils";
+import { GpaForecastCard } from "./gpa-forecast";
+import { GpaAttemptsCard, GpaHistoryCard, SEMESTER_OPTIONS } from "./gpa-history";
 import { RATING_TONE, useGpa } from "./use-gpa";
 
 /** A 0–4 track split into the official rating bands, with a marker at the student's CGPA. */
@@ -57,7 +59,8 @@ function GpaGauge({ value, scale }: { value: number | null; scale: GradingScale 
 export function GpaScreen() {
   const plan = usePlanContext();
   const setGrade = useAppStore((s) => s.setGrade);
-  const { scale, result } = useGpa();
+  const setGradeTerm = useAppStore((s) => s.setGradeTerm);
+  const { scale, result, policy } = useGpa();
   const university = getUniversity(plan.curriculum.universityId);
 
   if (!scale || !result) {
@@ -122,8 +125,15 @@ export function GpaScreen() {
                   {plural(result.notCounted.length, "course")} marked Pass or Transfer {result.notCounted.length === 1 ? "doesn't" : "don't"} count toward the GPA.
                 </p>
               )}
+              {result.attemptsCounted > 0 && (
+                <p className="mt-3 text-[13px] text-muted">
+                  Includes {plural(result.attemptsCounted, "earlier attempt")} of repeated or failed courses ({policy === "all" ? "every attempt counts" : "latest attempt only"} — your setting).
+                </p>
+              )}
             </CardBody>
           </Card>
+
+          <GpaForecastCard />
 
           <Card aria-labelledby="grades-title">
             <CardHeader
@@ -170,6 +180,19 @@ export function GpaScreen() {
                                   </option>
                                 ))}
                               </Select>
+                              <Select
+                                label={`Semester for ${course.title}`}
+                                value={plan.record.gradeTerms[course.code] ?? ""}
+                                onChange={(e) => setGradeTerm(course.code, e.target.value ? Number(e.target.value) : null)}
+                                className="h-9 w-[92px] shrink-0 text-[13px]"
+                              >
+                                <option value="">Sem —</option>
+                                {SEMESTER_OPTIONS.map((n) => (
+                                  <option key={n} value={n}>
+                                    Sem {n}
+                                  </option>
+                                ))}
+                              </Select>
                               <span className="num w-16 shrink-0 text-right text-xs text-muted">
                                 {points != null ? `${(points * course.credits).toFixed(1)} pts` : "—"}
                               </span>
@@ -190,6 +213,9 @@ export function GpaScreen() {
               )}
             </CardBody>
           </Card>
+
+          <GpaHistoryCard />
+          <GpaAttemptsCard />
         </div>
 
         <Card aria-labelledby="scale-title" className="self-start">
@@ -205,7 +231,7 @@ export function GpaScreen() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {scale.passingGrades.map((g) => (
+                {[...scale.passingGrades, ...scale.failingGrades].map((g) => (
                   <tr key={g.symbol}>
                     <td className="py-1.5 font-medium text-fg">{g.label}</td>
                     <td className="num py-1.5 text-muted">{g.range ?? "—"}</td>
