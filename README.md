@@ -8,11 +8,20 @@ Built for **NextSpark Hacks 2026**. No account and no paid services. Everything 
 
 **Live demo: https://unipath-eight-peach.vercel.app** — click **Try Demo** to explore a sample student.
 
-![UniPath overview for the sample student](docs/screenshots/desktop-overview.png)
+![UniPath Home for the sample student: today's classes, priorities and degree progress](docs/screenshots/desktop-home.png)
 
-| Semester roadmap | What if? | Phone |
-| --- | --- | --- |
-| ![Roadmap](docs/screenshots/desktop-roadmap.png) | ![What-if simulator](docs/screenshots/desktop-what-if.png) | ![Overview on a phone](docs/screenshots/mobile-overview.png) |
+| Calendar | Assignments and exams |
+| --- | --- |
+| ![Calendar with classes, deadlines, exams and events](docs/screenshots/desktop-calendar.png) | ![Assignments and exams ranked by urgency](docs/screenshots/desktop-tasks.png) |
+| **Degree map** | **What if?** |
+| ![Interactive prerequisite map](docs/screenshots/desktop-map.png) | ![What-if simulator comparing graduation dates](docs/screenshots/desktop-what-if.png) |
+
+<p align="center">
+  <img src="docs/screenshots/mobile-home.png" width="24%" alt="Home on a phone">
+  <img src="docs/screenshots/mobile-calendar.png" width="24%" alt="Calendar on a phone">
+  <img src="docs/screenshots/mobile-tasks.png" width="24%" alt="Assignments and exams on a phone">
+  <img src="docs/screenshots/mobile-planner.png" width="24%" alt="Semester planner on a phone">
+</p>
 
 > UniPath is an independent student project. It is not affiliated with or endorsed by Al Ain University. Course data is transcribed from publicly available study plans and may contain mistakes — always confirm your plan with your academic advisor.
 
