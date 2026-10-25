@@ -55,7 +55,8 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
     return error(503, "not_configured", "The AI coach isn't set up on this server yet (no AI API key).");
   }
 
-  const ctx = studentContext(curriculum, req);
+  const now = env.now?.() ?? new Date();
+  const ctx = studentContext(curriculum, req, now);
   const cacheKey =
     req.mode === "ideas"
       ? JSON.stringify([
@@ -67,7 +68,6 @@ export async function handleCoachRequest(request: Request, env: HandlerEnv): Pro
           ctx.interests,
         ])
       : null;
-  const now = env.now?.() ?? new Date();
   if (cacheKey) {
     const hit = ideasCache.get(cacheKey);
     if (hit && now.getTime() - hit.at < CACHE_MS) return Response.json(hit.value);

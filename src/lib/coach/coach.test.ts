@@ -83,8 +83,9 @@ describe("prompt building", () => {
   });
 
   it("describes the student and asks for JSON", () => {
-    const ctx = studentContext(se(), req({ interests: "  web apps\n\nand games " }));
+    const ctx = studentContext(se(), req({ interests: "  web apps\n\nand games " }), new Date("2026-10-25T10:00:00Z"));
     const prompt = ideasPrompt(ctx);
+    expect(prompt).toContain("Today: October 2026");
     expect(prompt).toContain("Bachelor of Science in Software Engineering");
     expect(prompt).toContain("0102221 Object-Oriented Programming");
     expect(prompt).toContain("Taking this semester (1)");
