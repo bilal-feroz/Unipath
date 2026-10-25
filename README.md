@@ -34,7 +34,7 @@ Degree requirements usually live in PDFs and tables. They don't know what *you* 
 | **Semester Planner** | A recommended next semester with a reason for every course; add/remove courses with clear explanations when something isn't allowed; a warning (with the reason) if your choices delay graduation; a semester-by-semester **roadmap**; **key courses** you shouldn't put off; and a **What if?** simulator. |
 | **Degree Map** | An interactive prerequisite graph (zoom, pan, fit, search, filter, click to highlight everything before and after a course), plus a list view for phones and screen readers. |
 
-Also: guided onboarding, a **Try Demo** sample student, dark and light themes, export/import of progress, printable roadmap, and an About page listing every data source and interpretation.
+Also: guided onboarding, a **Try Demo** sample student, a frosted-glass design with dark and light themes (the dark colour oozes out of the theme toggle, and is sucked back into it when switching to light, using the View Transitions API), a landing page with smooth scrolling and scroll-driven animations (all disabled for visitors who prefer reduced motion), export/import of progress, printable roadmap, and an About page listing every data source and interpretation.
 
 ### Planning engine
 

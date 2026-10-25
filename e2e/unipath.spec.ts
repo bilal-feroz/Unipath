@@ -139,9 +139,49 @@ test.describe("degree map", () => {
   });
 });
 
+test.describe("polish", () => {
+  test("has no console errors, even when an extension edits <body> before React loads", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => {
+      if (m.type() === "error") errors.push(m.text());
+    });
+    page.on("pageerror", (e) => errors.push(e.message));
+    // Grammarly adds these attributes to <body>, which used to cause a hydration error.
+    await page.addInitScript(() => {
+      new MutationObserver((_, observer) => {
+        if (!document.body) return;
+        document.body.setAttribute("data-gr-ext-installed", "");
+        document.body.setAttribute("data-new-gr-c-s-check-loaded", "14.1341.0");
+        observer.disconnect();
+      }).observe(document, { childList: true, subtree: true });
+    });
+    for (const path of ["/", "/start", "/about", "/demo", "/courses", "/planner", "/map"]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test("the theme toggle switches themes and remembers the choice", async ({ page }) => {
+    await page.goto("/");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    await page.getByRole("button", { name: "Switch between light and dark theme" }).click();
+    await expect(html).toHaveAttribute("data-theme", "light");
+    await page.reload();
+    await expect(html).toHaveAttribute("data-theme", "light");
+    await page.goto("/demo");
+    await expect(page).toHaveURL(/\/overview$/);
+    await expect(html).toHaveAttribute("data-theme", "light");
+    await page.getByRole("button", { name: "Switch between light and dark theme" }).click();
+    await expect(html).toHaveAttribute("data-theme", "dark");
+  });
+});
+
 test.describe("accessibility", () => {
-  for (const path of ["/", "/overview", "/courses", "/planner", "/map"]) {
-    test(`has no serious automated accessibility issues on ${path}`, async ({ page }) => {
+  for (const [theme, path] of ["dark", "light"].flatMap((t) => ["/", "/overview", "/courses", "/planner", "/map"].map((p) => [t, p]))) {
+    test(`has no serious automated accessibility issues on ${path} (${theme} theme)`, async ({ page }) => {
+      await page.addInitScript((t) => localStorage.setItem("unipath:theme", t), theme);
       await page.goto("/demo");
       await expect(page).toHaveURL(/\/overview$/);
       await page.goto(path);

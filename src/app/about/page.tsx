@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { SiteFooter } from "@/components/site-footer";
 import { Pill } from "@/components/ui/pill";
 import { allRegistryEntries, getUniversity } from "@/lib/curriculum/registry";
@@ -23,12 +24,15 @@ export default function AboutPage() {
   const entries = allRegistryEntries();
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-line bg-bg-elev/80">
+      <header className="glass-bar sticky top-0 z-40 border-b border-line">
         <div className="mx-auto flex h-[60px] max-w-3xl items-center justify-between px-4 sm:px-6">
           <Logo />
-          <Link href="/overview" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
-            <ArrowLeft aria-hidden className="size-4" /> Back to my plan
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/overview" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+              <ArrowLeft aria-hidden className="size-4" /> Back to my plan
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
@@ -48,7 +52,7 @@ export default function AboutPage() {
                 const c = entry.curriculum;
                 if (!c) return null;
                 return (
-                  <article key={c.id} className="rounded-2xl border border-line bg-surface p-5">
+                  <article key={c.id} className="glass rounded-2xl border border-line p-5">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold text-fg">
                         {c.degree} in {c.majorName}

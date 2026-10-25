@@ -35,7 +35,7 @@ export function MapListView({ onOpenCourse }: { onOpenCourse: (code: string) => 
   return (
     <div className="space-y-5">
       {levels.map(([level, codes]) => (
-        <section key={level} aria-labelledby={`level-${level}`} className="rounded-2xl border border-line bg-surface">
+        <section key={level} aria-labelledby={`level-${level}`} className="glass rounded-2xl border border-line">
           <header className="border-b border-line px-4 py-3">
             <h2 id={`level-${level}`} className="font-semibold">
               Step {level}

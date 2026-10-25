@@ -14,7 +14,7 @@ export function DropdownMenuContent({ children, className, align = "end" }: { ch
         align={align}
         sideOffset={8}
         className={cn(
-          "z-50 min-w-[230px] rounded-xl border border-line bg-bg-elev p-1.5 text-sm text-fg shadow-2xl data-[state=open]:animate-fade-in",
+          "glass-pop z-50 min-w-[230px] rounded-xl border border-line-strong p-1.5 text-sm text-fg data-[state=open]:animate-fade-in",
           className,
         )}
       >

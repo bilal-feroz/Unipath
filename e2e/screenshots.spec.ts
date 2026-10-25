@@ -34,3 +34,16 @@ for (const viewport of [
     await page.screenshot({ path: `docs/screenshots/${viewport.label}-what-if.png`, fullPage: viewport.label === "mobile" });
   });
 }
+
+test("screenshots light theme", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => localStorage.setItem("unipath:theme", "light"));
+  await page.goto("/demo");
+  await expect(page).toHaveURL(/\/overview$/);
+  for (const p of [pages[0], pages[1], pages[5]]) {
+    await page.goto(p.path);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `docs/screenshots/light-${p.name}.png` });
+  }
+});

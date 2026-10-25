@@ -30,10 +30,10 @@ export function DialogContent({
 }) {
   return (
     <D.Portal>
-      <D.Overlay className="fixed inset-0 z-50 bg-[#02060a]/70 backdrop-blur-[2px] data-[state=open]:animate-fade-in" />
+      <D.Overlay className="fixed inset-0 z-50 bg-[#02060a]/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
       <D.Content
         className={cn(
-          "fixed z-50 flex flex-col border border-line bg-bg-elev text-fg shadow-2xl focus:outline-none data-[state=open]:animate-fade-in",
+          "glass-pop fixed z-50 flex flex-col border border-line-strong text-fg focus:outline-none data-[state=open]:animate-fade-in",
           side === "center" &&
             "left-1/2 top-1/2 max-h-[min(88vh,760px)] w-[calc(100vw-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl",
           side === "right" &&

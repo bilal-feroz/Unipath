@@ -20,7 +20,7 @@ export function LivePreview() {
 
   return (
     <div className="grid gap-3 p-4 sm:grid-cols-5 sm:p-5">
-      <div className="rounded-xl border border-line bg-surface p-4 sm:col-span-3">
+      <div className="glass rounded-xl border border-line p-4 sm:col-span-3">
         <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Degree progress</p>
         <p className="mt-2 flex items-baseline gap-2">
           <span className="num text-3xl font-semibold">{plan.progress.countedCredits}</span>
@@ -51,7 +51,7 @@ export function LivePreview() {
         </ul>
       </div>
       <div className="flex flex-col gap-3 sm:col-span-2">
-        <div className="rounded-xl border border-line bg-surface p-4">
+        <div className="glass rounded-xl border border-line p-4">
           <div className="flex items-center justify-between">
             <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Estimated graduation</p>
             <Pill tone="accent">Estimate</Pill>
@@ -63,7 +63,7 @@ export function LivePreview() {
           <p className="mt-1 text-[13px] text-muted">{plan.roadmap.semesterCount} semesters at up to 18 credits</p>
         </div>
         {plan.insight && (
-          <div className="rounded-xl border border-line bg-surface p-4">
+          <div className="glass rounded-xl border border-line p-4">
             <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Insight</p>
             <p className="mt-2 text-[13px] leading-relaxed text-fg">{plan.insight.message}</p>
           </div>

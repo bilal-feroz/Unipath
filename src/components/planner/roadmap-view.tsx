@@ -87,7 +87,7 @@ export function RoadmapView({ onOpenCourse }: { onOpenCourse: (code: string) => 
             <section
               aria-labelledby={`sem-${sem.index}`}
               className={cn(
-                "flex h-full flex-col rounded-2xl border bg-surface",
+                "glass flex h-full flex-col rounded-2xl border transition-transform duration-300 hover:-translate-y-0.5",
                 i === 0 ? "border-plan/40" : "border-line",
               )}
             >

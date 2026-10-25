@@ -67,7 +67,7 @@ export function CoursesScreen() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
         eyebrow="02 · My Courses"
         title="Your courses"
@@ -102,7 +102,7 @@ export function CoursesScreen() {
               "inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] transition-colors",
               status === f.value
                 ? "border-accent bg-accent-soft font-semibold text-fg"
-                : "border-line bg-surface text-muted hover:border-line-strong hover:text-fg",
+                : "glass border-line text-muted hover:border-line-strong hover:text-fg",
             )}
           >
             {f.label}
@@ -130,7 +130,7 @@ export function CoursesScreen() {
       ) : (
         <div className="mt-6 space-y-5">
           {groups.map(({ group, progress, courses }) => (
-            <section key={group.id} aria-labelledby={`g-${group.id}`} className="rounded-2xl border border-line bg-surface">
+            <section key={group.id} aria-labelledby={`g-${group.id}`} className="glass rounded-2xl border border-line">
               <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-3.5 sm:px-5">
                 <div className="min-w-0 flex-1">
                   <h2 id={`g-${group.id}`} className="font-semibold text-fg">

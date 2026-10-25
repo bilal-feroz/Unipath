@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { BrowserOnly } from "@/components/browser-only";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Pill } from "@/components/ui/pill";
 import { getUniversity } from "@/lib/curriculum/registry";
@@ -49,7 +50,7 @@ function MobileNav() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg-elev/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="grid grid-cols-4">
         {NAV_ITEMS.map((item) => {
@@ -140,11 +141,14 @@ function NoPlan() {
 function ShellFrame({ right, children }: { right?: ReactNode; children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-bg-elev/90 backdrop-blur">
+      <header className="glass-bar sticky top-0 z-40 border-b border-line">
         <div className="mx-auto grid h-[60px] max-w-6xl grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr]">
           <Logo href="/overview" />
           <DesktopNav />
-          <div className="flex items-center justify-end gap-2">{right}</div>
+          <div className="flex items-center justify-end gap-2">
+            {right}
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       {children}
@@ -201,8 +205,8 @@ function ShellSkeleton() {
         <p className="sr-only">Loading your plan…</p>
         <div className="h-8 w-64 animate-pulse rounded-lg bg-surface-2" />
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="h-40 animate-pulse rounded-2xl bg-surface md:col-span-2" />
-          <div className="h-40 animate-pulse rounded-2xl bg-surface" />
+          <div className="glass h-40 animate-pulse rounded-2xl md:col-span-2" />
+          <div className="glass h-40 animate-pulse rounded-2xl" />
         </div>
       </main>
     </ShellFrame>

@@ -5,11 +5,9 @@ import {
   Download,
   Info,
   LogOut,
-  Moon,
   RotateCcw,
   Settings,
   SlidersHorizontal,
-  Sun,
   Upload,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,7 +28,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { exportState, importState } from "@/lib/state/persistence";
 import { activeProfileOf, useAppStore } from "@/lib/state/store";
-import { currentTheme, setTheme, type ThemeChoice } from "@/lib/theme";
 
 type Open = null | "settings" | "reset" | "import";
 
@@ -41,15 +38,8 @@ export function SettingsMenu() {
   const profile = useAppStore((s) => activeProfileOf(s));
   const { resetProgress, resetDemo, exitDemo, replaceState } = useAppStore.getState();
   const [open, setOpen] = useState<Open>(null);
-  const [theme, setThemeState] = useState<ThemeChoice>(() => currentTheme());
   const [importError, setImportError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    setThemeState(next);
-  };
 
   const download = () => {
     const s = useAppStore.getState();
@@ -91,9 +81,6 @@ export function SettingsMenu() {
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => router.push("/start")}>
             <ArrowLeftRight /> {isDemo ? "Start my own plan" : "Switch major"}
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={toggleTheme}>
-            {theme === "dark" ? <Sun /> : <Moon />} {theme === "dark" ? "Light theme" : "Dark theme"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>Your data</DropdownMenuLabel>

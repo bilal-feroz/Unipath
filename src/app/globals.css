@@ -2,68 +2,82 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Dark is the default theme; light is equally supported. */
+/* Dark is the default theme; light is equally supported. Surfaces are translucent "glass". */
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #050b11;
-  --bg-elev: #07121b;
-  --surface: #0a1822;
-  --surface-2: #0f2130;
-  --border: rgba(150, 200, 220, 0.13);
-  --border-strong: rgba(150, 200, 220, 0.26);
-  --text: #e7f1f5;
-  --text-muted: #9ab0bc;
-  --text-dim: #7a95a5;
+  --bg: #04090e;
+  --bg-elev: rgba(8, 19, 28, 0.72);
+  --surface: rgba(14, 31, 44, 0.52);
+  --surface-solid: #0b1923;
+  --surface-2: rgba(26, 48, 64, 0.5);
+  --glass-sheen: rgba(255, 255, 255, 0.045);
+  --glass-blur: 18px;
+  --border: rgba(160, 210, 230, 0.13);
+  --border-strong: rgba(160, 210, 230, 0.26);
+  --text: #e9f3f7;
+  --text-muted: #a0b6c2;
+  --text-dim: #7f9aaa;
   --accent: #22d3ee;
   --accent-strong: #67e8f9;
   --accent-fg: #03121a;
-  --accent-soft: rgba(34, 211, 238, 0.12);
+  --accent-soft: rgba(34, 211, 238, 0.13);
   --done: #34d399;
-  --done-soft: rgba(52, 211, 153, 0.13);
+  --done-soft: rgba(52, 211, 153, 0.14);
   --open: #60a5fa;
-  --open-soft: rgba(96, 165, 250, 0.14);
+  --open-soft: rgba(96, 165, 250, 0.15);
   --plan: #b39dfa;
-  --plan-soft: rgba(167, 139, 250, 0.16);
-  --lock: #8ea1ae;
+  --plan-soft: rgba(167, 139, 250, 0.17);
+  --lock: #93a6b3;
   --lock-soft: rgba(142, 161, 174, 0.12);
   --warn: #fbbf24;
-  --warn-soft: rgba(251, 191, 36, 0.12);
+  --warn-soft: rgba(251, 191, 36, 0.13);
   --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.12);
-  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px -16px rgba(0, 0, 0, 0.6);
-  --grid-line: rgba(150, 200, 220, 0.05);
+  --danger-soft: rgba(248, 113, 113, 0.13);
+  --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 48px -28px rgba(0, 0, 0, 0.85);
+  --shadow-pop: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 30px 70px -20px rgba(0, 0, 0, 0.8);
+  --grid-line: rgba(150, 200, 220, 0.055);
+  --aurora-1: rgba(34, 211, 238, 0.2);
+  --aurora-2: rgba(59, 130, 246, 0.16);
+  --aurora-3: rgba(139, 92, 246, 0.14);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f4f7f9;
-  --bg-elev: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #edf2f5;
-  --border: #dbe4ea;
-  --border-strong: #bfcdd6;
+  --bg: #edf2f6;
+  --bg-elev: rgba(255, 255, 255, 0.72);
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-solid: #ffffff;
+  --surface-2: rgba(226, 235, 241, 0.72);
+  --glass-sheen: rgba(255, 255, 255, 0.6);
+  --glass-blur: 18px;
+  --border: rgba(11, 26, 36, 0.1);
+  --border-strong: rgba(11, 26, 36, 0.2);
   --text: #0b1a24;
-  --text-muted: #48606f;
-  --text-dim: #5b6f7d;
-  --accent: #0e7490;
-  --accent-strong: #155e75;
+  --text-muted: #44596a;
+  --text-dim: #566b7a;
+  --accent: #0c6680;
+  --accent-strong: #0a5266;
   --accent-fg: #ffffff;
-  --accent-soft: rgba(14, 116, 144, 0.1);
+  --accent-soft: rgba(12, 102, 128, 0.11);
   --done: #047857;
-  --done-soft: rgba(4, 120, 87, 0.1);
+  --done-soft: rgba(4, 120, 87, 0.11);
   --open: #1d4ed8;
-  --open-soft: rgba(29, 78, 216, 0.09);
+  --open-soft: rgba(29, 78, 216, 0.1);
   --plan: #6d28d9;
-  --plan-soft: rgba(109, 40, 217, 0.09);
-  --lock: #566977;
-  --lock-soft: rgba(86, 105, 119, 0.1);
-  --warn: #a15c07;
-  --warn-soft: rgba(217, 119, 6, 0.11);
+  --plan-soft: rgba(109, 40, 217, 0.1);
+  --lock: #52656f;
+  --lock-soft: rgba(86, 105, 119, 0.11);
+  --warn: #9a5506;
+  --warn-soft: rgba(217, 119, 6, 0.12);
   --danger: #b91c1c;
-  --danger-soft: rgba(185, 28, 28, 0.09);
-  --shadow: 0 1px 2px rgba(11, 26, 36, 0.05), 0 8px 24px -12px rgba(11, 26, 36, 0.12);
-  --grid-line: rgba(11, 26, 36, 0.04);
+  --danger-soft: rgba(185, 28, 28, 0.1);
+  --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 18px 40px -24px rgba(15, 40, 60, 0.35);
+  --shadow-pop: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 30px 60px -24px rgba(15, 40, 60, 0.4);
+  --grid-line: rgba(11, 26, 36, 0.045);
+  --aurora-1: rgba(14, 165, 233, 0.24);
+  --aurora-2: rgba(99, 102, 241, 0.16);
+  --aurora-3: rgba(45, 212, 191, 0.2);
 }
 
 @theme inline {
@@ -98,6 +112,29 @@
   --animate-fade-in: fade-in 0.25s ease-out;
 }
 
+/* Frosted-glass surfaces. Borders stay on the element so state colours (selected, warning) still apply. */
+@utility glass {
+  background: linear-gradient(180deg, var(--glass-sheen), transparent 42%), var(--surface);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  box-shadow: var(--shadow);
+}
+
+/* Bars that float over content: headers, footers, bottom navigation. */
+@utility glass-bar {
+  background: var(--bg-elev);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+}
+
+/* Menus, dialogs and toasts: more opaque so text stays crisp over anything. */
+@utility glass-pop {
+  background: linear-gradient(180deg, var(--glass-sheen), transparent 40%), var(--bg-elev);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--shadow-pop);
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -111,13 +148,45 @@
 
 html {
   background: var(--bg);
+  scroll-padding-top: 84px;
 }
 
 body {
-  background: var(--bg);
+  /* Transparent so the fixed aurora layer behind the page shows through the glass. */
+  background: transparent;
   color: var(--text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Soft moving colour behind every page, plus a faint grid near the top. */
+.backdrop-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.backdrop-aurora::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(32% 30% at 18% 16%, var(--aurora-1), transparent 70%),
+    radial-gradient(30% 28% at 84% 22%, var(--aurora-2), transparent 70%),
+    radial-gradient(38% 34% at 55% 88%, var(--aurora-3), transparent 72%);
+  will-change: transform;
+}
+.backdrop-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 36px 36px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
 }
 
 /* Visible, consistent focus for keyboard users. */
@@ -132,14 +201,157 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.bg-grid {
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 32px 32px;
+.text-gradient {
+  background: linear-gradient(100deg, var(--accent) 10%, var(--open) 55%, var(--plan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-/* Printing the roadmap: light colours, no navigation chrome. */
+/* ---------- Theme switch: dark oozes out of / is sucked into the toggle (see lib/theme.ts) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theme-transition="suck"]::view-transition-old(root) {
+  z-index: 2;
+}
+html[data-theme-transition="suck"]::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* ---------- Motion (only when the visitor hasn't asked for less) ---------- */
+.scroll-progress {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .backdrop-aurora::before {
+    animation: aurora-drift 28s ease-in-out infinite alternate;
+  }
+
+  .page-in {
+    animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Staggered entrance on page load; set --d for the delay. */
+  .enter {
+    animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  .float-slow {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  /* Scroll-driven effects, where the browser supports them. Content is fully visible otherwise. */
+  @supports (animation-timeline: view()) {
+    .scroll-progress {
+      animation: grow-x linear both;
+      animation-timeline: scroll(root block);
+    }
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 26%;
+    }
+    .reveal-2 {
+      animation-range: entry 6% cover 30%;
+    }
+    .reveal-3 {
+      animation-range: entry 12% cover 34%;
+    }
+    .tilt-in {
+      animation: tilt-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
+      transform-origin: 50% 0%;
+    }
+    .parallax {
+      animation: parallax linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(56px) scale(0.97);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes tilt-in {
+  from {
+    opacity: 0.55;
+    transform: perspective(1400px) rotateX(24deg) scale(0.9) translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1400px) rotateX(0deg) scale(1) translateY(0);
+  }
+}
+
+@keyframes parallax {
+  to {
+    transform: translateY(-260px);
+  }
+}
+
+@keyframes grow-x {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -3%, 0) rotate(10deg) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-4%, 3%, 0) rotate(-8deg) scale(1);
+  }
+}
+
+/* Printing the roadmap: light colours, no navigation chrome or effects. */
 @media print {
   :root,
   :root[data-theme="dark"] {
@@ -155,9 +367,11 @@ body {
     --text-dim: #5b6f7d;
     --accent: #0e7490;
     --shadow: none;
+    --glass-sheen: transparent;
   }
   header,
   nav,
+  .backdrop-aurora,
   [data-sonner-toaster] {
     display: none !important;
   }
@@ -179,10 +393,14 @@ body {
   --xy-background-color: transparent;
   --xy-edge-stroke: var(--border-strong);
   --xy-edge-stroke-selected: var(--accent);
-  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color: var(--surface-solid);
   --xy-controls-button-background-color-hover: var(--surface-2);
   --xy-controls-button-color: var(--text);
   --xy-controls-button-border-color: var(--border);
-  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-background-color: var(--surface-solid);
   --xy-attribution-background-color: transparent;
+}
+.react-flow__attribution a {
+  color: var(--text-dim);
+  font-size: 10px;
 }

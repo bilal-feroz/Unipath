@@ -66,7 +66,7 @@ function ChoiceCard({
       onClick={onSelect}
       className={cn(
         "flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-colors",
-        selected ? "border-accent bg-accent-soft" : "border-line bg-surface hover:border-line-strong",
+        selected ? "border-accent bg-accent-soft" : "glass border-line hover:border-line-strong",
       )}
     >
       <span
@@ -346,7 +346,7 @@ export function Onboarding() {
               const codes = section.courses.map((c) => c.code);
               const allOn = codes.every((c) => selected.has(c));
               return (
-                <fieldset key={section.id} className="rounded-2xl border border-line bg-surface">
+                <fieldset key={section.id} className="glass rounded-2xl border border-line">
                   <legend className="sr-only">{section.title}</legend>
                   <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
                     <div>
@@ -385,7 +385,7 @@ export function Onboarding() {
             {visibleSections.length === 0 && <p className="text-sm text-muted">No courses match “{query}”.</p>}
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg-elev/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+          <div className="glass-bar fixed inset-x-0 bottom-0 z-30 border-t border-line pb-[env(safe-area-inset-bottom)]">
             <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
               <Button variant="ghost" onClick={() => setStep(1)}>
                 <ArrowLeft /> <span className="hidden sm:inline">Back</span>

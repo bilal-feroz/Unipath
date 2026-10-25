@@ -54,7 +54,7 @@ function CourseNode({ data }: NodeProps<Node<CourseNodeData>>) {
         style={{
           width: NODE_W,
           height: NODE_H,
-          background: `linear-gradient(${meta.tint}, ${meta.tint}), var(--surface)`,
+          background: `linear-gradient(${meta.tint}, ${meta.tint}), var(--surface-solid)`,
           borderLeft: `3px solid ${meta.color}`,
         }}
         className={cn(
@@ -196,7 +196,7 @@ function GraphView({ onOpenCourse }: { onOpenCourse: (code: string) => void }) {
             }}
           />
           {matches.length > 0 && (
-            <ul className="absolute inset-x-0 top-11 z-20 overflow-hidden rounded-xl border border-line bg-bg-elev shadow-2xl">
+            <ul className="glass-pop absolute inset-x-0 top-11 z-20 overflow-hidden rounded-xl border border-line-strong">
               {matches.map((c) => (
                 <li key={c.code}>
                   <button
@@ -225,7 +225,7 @@ function GraphView({ onOpenCourse }: { onOpenCourse: (code: string) => void }) {
         />
       </div>
 
-      <div className="relative mt-3 h-[68vh] min-h-[460px] overflow-hidden rounded-2xl border border-line bg-bg-elev">
+      <div className="glass relative mt-3 h-[68vh] min-h-[460px] overflow-hidden rounded-2xl border border-line">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -241,7 +241,6 @@ function GraphView({ onOpenCourse }: { onOpenCourse: (code: string) => void }) {
             if (node.type === "course") setSelected((cur) => (cur === node.id ? null : node.id));
           }}
           onPaneClick={() => setSelected(null)}
-          proOptions={{ hideAttribution: true }}
         >
           <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" />
           <Controls showInteractive={false} position="bottom-right" />
@@ -262,7 +261,7 @@ function GraphView({ onOpenCourse }: { onOpenCourse: (code: string) => void }) {
         {selectedCourse && family && (
           <div
             role="status"
-            className="absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-center gap-3 rounded-xl border border-line-strong bg-bg-elev/95 p-3 shadow-2xl backdrop-blur md:right-auto md:max-w-xl"
+            className="glass-pop absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-center gap-3 rounded-xl border border-line-strong p-3 md:right-auto md:max-w-xl"
           >
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-fg">{selectedCourse.title}</p>
@@ -294,7 +293,7 @@ export function MapScreen() {
   const [openCode, setOpenCode] = useState<string | null>(null);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
         eyebrow="04 · Degree Map"
         title="How your courses connect"
