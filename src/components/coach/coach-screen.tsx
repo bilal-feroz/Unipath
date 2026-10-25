@@ -93,13 +93,13 @@ function IdeaCard({ idea, onAsk }: { idea: ProjectIdea; onAsk: (q: string) => vo
 
         {idea.whyItFits && (
           <div>
-            <p className="num mb-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Why it fits you</p>
+            <p className="mb-1 text-[12.5px] font-medium text-muted">Why it fits you</p>
             <p className="text-sm text-fg">{idea.whyItFits}</p>
           </div>
         )}
         {idea.buildsOn.length > 0 && (
           <div>
-            <p className="num mb-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+            <p className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
               <BookOpen aria-hidden className="size-3" /> Builds on
             </p>
             <Chips items={idea.buildsOn.map((c) => plan.index.byCode.get(c)?.title ?? c)} tone="done" />
@@ -107,7 +107,7 @@ function IdeaCard({ idea, onAsk }: { idea: ProjectIdea; onAsk: (q: string) => vo
         )}
         {idea.industryPractices.length > 0 && (
           <div>
-            <p className="num mb-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+            <p className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
               <TrendingUp aria-hidden className="size-3" /> Industry practices you&apos;ll show
             </p>
             <ul className="list-disc space-y-1 pl-5 text-sm text-fg">
@@ -119,7 +119,7 @@ function IdeaCard({ idea, onAsk }: { idea: ProjectIdea; onAsk: (q: string) => vo
         )}
         {(idea.stack.length > 0 || idea.skills.length > 0) && (
           <div>
-            <p className="num mb-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+            <p className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
               <Wrench aria-hidden className="size-3" /> Tools and skills
             </p>
             <Chips items={[...new Set([...idea.stack, ...idea.skills])]} tone="accent" />
@@ -127,7 +127,7 @@ function IdeaCard({ idea, onAsk }: { idea: ProjectIdea; onAsk: (q: string) => vo
         )}
         {idea.firstSteps.length > 0 && (
           <div>
-            <p className="num mb-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+            <p className="mb-1.5 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
               <Footprints aria-hidden className="size-3" /> First steps
             </p>
             <ol className="list-decimal space-y-1 pl-5 text-sm text-fg">
@@ -230,15 +230,14 @@ export function CoachScreen() {
   return (
     <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
-        eyebrow="06 · AI Coach"
-        title="Project ideas for you"
-        description="Portfolio projects that build on your courses and on what employers expect right now, checked with a live web search."
+        title="AI coach"
+        description="Portfolio project ideas based on your courses and what employers want now."
       />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
         <div className="space-y-4">
           <Card aria-labelledby="start-title">
-            <CardHeader titleId="start-title" eyebrow="Your starting point" title="What the coach will look at" />
+            <CardHeader titleId="start-title" title="What the coach looks at" />
             <CardBody className="space-y-5">
               <div>
                 <p className="text-sm text-fg">
@@ -351,7 +350,6 @@ export function CoachScreen() {
                 <Card aria-labelledby="trends-title">
                   <CardHeader
                     titleId="trends-title"
-                    eyebrow={coach.ideas.searched ? "Right now" : "From the AI's own knowledge"}
                     title="What employers expect"
                   />
                   <CardBody>
@@ -361,7 +359,7 @@ export function CoachScreen() {
                     </p>
                     {coach.ideas.sources.length > 0 && (
                       <div className="mt-4">
-                        <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+                        <p className="text-[12.5px] font-medium text-muted">
                           Sources found with a web search
                         </p>
                         <Sources sources={coach.ideas.sources} />
@@ -390,9 +388,7 @@ export function CoachScreen() {
               <Card aria-labelledby="chat-title">
                 <CardHeader
                   titleId="chat-title"
-                  eyebrow="Follow-up"
-                  title="Ask the coach"
-                  description="Questions about these projects, tools or skills."
+                  title="Ask a follow-up"
                 />
                 <CardBody>
                   {coach.chat.length > 0 && (

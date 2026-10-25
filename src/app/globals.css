@@ -412,7 +412,15 @@ html[data-theme-transition="suck"]::view-transition-new(root) {
   --xy-controls-button-color: var(--text);
   --xy-controls-button-border-color: var(--border);
   --xy-minimap-background-color: var(--surface-solid);
+  --xy-minimap-mask-background-color: color-mix(in oklab, var(--bg) 62%, transparent);
+  --xy-minimap-mask-stroke-color: var(--accent);
+  --xy-minimap-mask-stroke-width: 2;
   --xy-attribution-background-color: transparent;
+}
+.react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
 .react-flow__attribution a {
   color: var(--text-dim);

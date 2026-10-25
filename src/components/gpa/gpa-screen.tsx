@@ -63,7 +63,7 @@ export function GpaScreen() {
   if (!scale || !result) {
     return (
       <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <PageHeader eyebrow="05 · GPA" title="Your GPA" />
+        <PageHeader title="Your GPA" />
         <p className="mt-6 text-muted">
           UniPath doesn&apos;t have a verified grading scale for {university?.name ?? "this university"} yet, so it
           can&apos;t calculate a GPA.
@@ -80,15 +80,14 @@ export function GpaScreen() {
   return (
     <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
-        eyebrow="05 · GPA"
         title="Your GPA"
-        description={`Add the grade you got in each completed course. UniPath works out your CGPA on ${university?.name ?? "your university"}'s official ${scale.maxPoints.toFixed(1)} scale.`}
+        description={`Add your grades to see your CGPA on ${university?.shortName ?? "your university"}'s official ${scale.maxPoints.toFixed(1)} scale.`}
       />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <Card aria-labelledby="cgpa-title">
-            <CardHeader titleId="cgpa-title" eyebrow="Cumulative GPA" title="Where your grades stand" />
+            <CardHeader titleId="cgpa-title" title="Cumulative GPA" />
             <CardBody>
               <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
                 <p className="num text-6xl font-semibold tracking-tight text-fg" data-testid="cgpa">
@@ -129,9 +128,8 @@ export function GpaScreen() {
           <Card aria-labelledby="grades-title">
             <CardHeader
               titleId="grades-title"
-              eyebrow="Your grades"
-              title="Completed courses"
-              description="Grades are saved in this browser only."
+              title="Your grades"
+              description="Saved in this browser only."
             />
             <CardBody>
               {groups.length === 0 ? (
@@ -147,7 +145,7 @@ export function GpaScreen() {
                 <div className="space-y-5">
                   {groups.map(({ group, courses }) => (
                     <section key={group.id} aria-labelledby={`gpa-${group.id}`}>
-                      <h3 id={`gpa-${group.id}`} className="num mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">
+                      <h3 id={`gpa-${group.id}`} className="mb-2 text-[12.5px] font-medium text-muted">
                         {group.title}
                       </h3>
                       <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
@@ -195,12 +193,12 @@ export function GpaScreen() {
         </div>
 
         <Card aria-labelledby="scale-title" className="self-start">
-          <CardHeader titleId="scale-title" eyebrow="Official scale" title={scale.name} />
+          <CardHeader titleId="scale-title" title="Grading scale" description={scale.name} />
           <CardBody>
             <table className="w-full text-sm">
               <caption className="sr-only">Grade points</caption>
               <thead>
-                <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-dim">
+                <tr className="text-left text-[12.5px] font-medium text-muted">
                   <th className="pb-2 font-semibold">Grade</th>
                   <th className="pb-2 font-semibold">Mark</th>
                   <th className="pb-2 text-right font-semibold">Points</th>
@@ -217,7 +215,7 @@ export function GpaScreen() {
               </tbody>
             </table>
 
-            <h3 className="num mt-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Ratings</h3>
+            <h3 className="mt-5 text-[12.5px] font-medium text-muted">Ratings</h3>
             <ul className="mt-2 space-y-1 text-sm">
               {scale.ratings.map((r, i) => {
                 const upper = i === 0 ? scale.maxPoints : scale.ratings[i - 1].min - 0.01;

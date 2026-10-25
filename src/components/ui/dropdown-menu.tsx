@@ -37,7 +37,7 @@ export function DropdownMenuItem({ className, ...props }: ComponentProps<typeof 
 }
 
 export function DropdownMenuLabel({ className, ...props }: ComponentProps<typeof M.Label>) {
-  return <M.Label className={cn("num px-2.5 pb-1 pt-2 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-dim", className)} {...props} />;
+  return <M.Label className={cn("px-2.5 pb-1 pt-2 text-[12.5px] font-medium text-muted", className)} {...props} />;
 }
 
 export function DropdownMenuSeparator() {

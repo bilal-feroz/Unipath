@@ -21,7 +21,7 @@ export function LivePreview() {
   return (
     <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-5 sm:p-5">
       <div className="glass min-w-0 rounded-xl border border-line p-4 sm:col-span-3">
-        <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Degree progress</p>
+        <p className="text-[12.5px] font-medium text-muted">Degree progress</p>
         <p className="mt-2 flex items-baseline gap-2">
           <span className="num text-3xl font-semibold">{plan.progress.countedCredits}</span>
           <span className="text-sm text-muted">of {plan.progress.totalCredits} credit hours</span>
@@ -32,7 +32,7 @@ export function LivePreview() {
           max={plan.progress.totalCredits}
           label="Sample student's degree progress"
         />
-        <p className="num mt-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">
+        <p className="mt-4 text-[12.5px] font-medium text-muted">
           Next semester · {plan.roadmap.semesters[0]?.label}
         </p>
         <ul className="mt-2 space-y-1.5">
@@ -53,7 +53,7 @@ export function LivePreview() {
       <div className="flex min-w-0 flex-col gap-3 sm:col-span-2">
         <div className="glass rounded-xl border border-line p-4">
           <div className="flex items-center justify-between">
-            <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Estimated graduation</p>
+            <p className="text-[12.5px] font-medium text-muted">Estimated graduation</p>
             <Pill tone="accent">Estimate</Pill>
           </div>
           <p className="mt-2 flex items-center gap-2 text-xl font-semibold">
@@ -64,7 +64,7 @@ export function LivePreview() {
         </div>
         {plan.insight && (
           <div className="glass rounded-xl border border-line p-4">
-            <p className="num text-[10.5px] font-semibold uppercase tracking-[0.12em] text-dim">Insight</p>
+            <p className="text-[12.5px] font-medium text-muted">Insight</p>
             <p className="mt-2 text-[13px] leading-relaxed text-fg">{plan.insight.message}</p>
           </div>
         )}

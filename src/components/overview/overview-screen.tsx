@@ -21,7 +21,7 @@ function ProgressCard() {
   const [open, setOpen] = useState(false);
   return (
     <Card className="lg:col-span-2" aria-labelledby="progress-title">
-      <CardHeader titleId="progress-title" eyebrow="Degree progress" title="How far you've come" />
+      <CardHeader titleId="progress-title" title="Degree progress" />
       <CardBody>
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <p className="flex items-baseline gap-2">
@@ -116,12 +116,7 @@ function GraduationCard() {
   const semesters = roadmap.semesterCount;
   return (
     <Card aria-labelledby="grad-title" className="flex flex-col">
-      <CardHeader
-        titleId="grad-title"
-        eyebrow="Estimated graduation"
-        title="When you could finish"
-        action={<Pill tone="accent">Estimate</Pill>}
-      />
+      <CardHeader titleId="grad-title" title="Estimated graduation" />
       <CardBody className="flex flex-1 flex-col">
         {progress.complete ? (
           <p className="text-sm text-muted">You&apos;ve met every requirement in this plan.</p>
@@ -173,12 +168,11 @@ function NextSemesterCard({ onOpenCourse }: { onOpenCourse: (code: string) => vo
     <Card className="lg:col-span-2" aria-labelledby="next-title">
       <CardHeader
         titleId="next-title"
-        eyebrow={first && first.index === 0 ? `Next semester · ${first.label}` : "Next semester"}
-        title="Courses you can take next"
+        title={first && first.index === 0 ? `Next semester · ${first.label}` : "Next semester"}
         description={
           plan.progress.complete
             ? undefined
-            : `You're eligible for ${plural(eligibleCount, "course")} right now. Here's the set UniPath recommends${plan.isCustomized ? " (adjusted by you)" : ""}.`
+            : `${plan.isCustomized ? "Your picks" : "Suggested"} from the ${plural(eligibleCount, "course")} you can take.`
         }
       />
       <CardBody>
@@ -234,7 +228,7 @@ function InsightCard({ onOpenCourse }: { onOpenCourse: (code: string) => void })
   const { insight } = usePlanContext();
   return (
     <Card aria-labelledby="insight-title" className="flex flex-col">
-      <CardHeader titleId="insight-title" eyebrow="Helpful insight" title="Worth knowing" />
+      <CardHeader titleId="insight-title" title="Worth knowing" />
       <CardBody className="flex flex-1 flex-col">
         {insight ? (
           <>
@@ -269,7 +263,6 @@ export function OverviewScreen() {
   return (
     <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
-        eyebrow="01 · Overview"
         title={plan.curriculum.majorName}
         description={`${plan.curriculum.degree} · ${university?.name ?? ""}`}
       />

@@ -66,9 +66,8 @@ export function WhatIf() {
       <Card aria-labelledby="sim-controls">
         <CardHeader
           titleId="sim-controls"
-          eyebrow="Simulation"
           title="Try a change"
-          description="Nothing here touches your saved plan unless you press Apply."
+          description="Your saved plan only changes if you press Apply."
         />
         <CardBody className="space-y-6">
           <div>
@@ -216,7 +215,7 @@ export function WhatIf() {
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <div className="rounded-xl border border-line bg-bg/40 p-3.5">
-                  <p className="num text-[10.5px] uppercase tracking-[0.12em] text-dim">Current plan</p>
+                  <p className="text-[12.5px] font-medium text-muted">Current plan</p>
                   <p className="mt-1 text-xl font-semibold text-fg" data-testid="sim-baseline">
                     {result.baseline.semesters.at(-1)?.label ?? "—"}
                   </p>
@@ -235,7 +234,7 @@ export function WhatIf() {
                         : "border-line bg-bg/40",
                   )}
                 >
-                  <p className="num text-[10.5px] uppercase tracking-[0.12em] text-dim">What if</p>
+                  <p className="text-[12.5px] font-medium text-muted">What if</p>
                   <p className="mt-1 text-xl font-semibold text-fg" data-testid="sim-result-term">
                     {result.simulated.blocked ? "No plan" : (result.simulated.semesters.at(-1)?.label ?? "—")}
                   </p>
@@ -245,7 +244,7 @@ export function WhatIf() {
                 </div>
               </div>
 
-              <h3 className="num mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Why</h3>
+              <h3 className="mt-6 text-[12.5px] font-medium text-muted">Why</h3>
               <ul className="mt-2 space-y-1.5">
                 {result.reasons.map((r) => (
                   <li key={r} className="flex gap-2 text-sm text-fg">
@@ -255,7 +254,7 @@ export function WhatIf() {
                 ))}
               </ul>
 
-              <h3 className="num mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">
+              <h3 className="mt-6 text-[12.5px] font-medium text-muted">
                 Courses affected ({result.affected.length})
               </h3>
               {result.affected.length === 0 ? (

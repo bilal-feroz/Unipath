@@ -39,9 +39,7 @@ export function PlannerScreen() {
   return (
     <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
-        eyebrow="03 · Semester Planner"
-        title="Plan your semesters"
-        description="A recommended next semester, your full roadmap to graduation, and a safe place to try “what if?”."
+        title="Semester planner"
       />
       <Tabs.Root
         value={tab}

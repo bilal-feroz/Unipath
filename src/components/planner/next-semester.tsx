@@ -70,14 +70,13 @@ export function NextSemester({ onOpenCourse }: { onOpenCourse: (code: string) =>
         <Card aria-labelledby="next-sem-title">
           <CardHeader
             titleId="next-sem-title"
-            eyebrow={termName}
-            title={plan.isCustomized ? "Your next semester" : "Recommended next semester"}
+            title={termName ? `Next semester · ${termName}` : "Next semester"}
             description={
               plan.isCustomized
-                ? "You've adjusted this plan. UniPath plans everything after it around your choices."
-                : "Chosen to keep you on track: courses that hold up the most later courses come first."
+                ? "Your own picks. Everything after it is planned around them."
+                : "Suggested by UniPath. Courses that hold up the most later ones come first."
             }
-            action={plan.isCustomized ? <Pill tone="plan">Customized</Pill> : <Pill tone="accent">Recommended</Pill>}
+            action={plan.isCustomized ? <Pill tone="plan">Customized</Pill> : undefined}
           />
           <CardBody>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -146,14 +145,13 @@ export function NextSemester({ onOpenCourse }: { onOpenCourse: (code: string) =>
                               {l.title}
                             </button>
                           )}
-                          <ul className="mt-1 space-y-0.5">
-                            {reasons.map((r) => (
-                              <li key={r} className="text-[13px] text-muted">
-                                <span className="sr-only">Why: </span>
-                                {r}
-                              </li>
-                            ))}
-                          </ul>
+                          {reasons[0] && (
+                            // The main reason only; the course details have the full picture.
+                            <p className="mt-1 text-[13px] text-muted">
+                              <span className="sr-only">Why: </span>
+                              {reasons[0]}
+                            </p>
+                          )}
                           {item.kind === "slot" && <SlotPicker item={item} />}
                         </div>
                         <span className="num shrink-0 text-xs text-muted">{item.credits} cr</span>
@@ -195,9 +193,8 @@ export function NextSemester({ onOpenCourse }: { onOpenCourse: (code: string) =>
         <Card aria-labelledby="load-title">
           <CardHeader
             titleId="load-title"
-            eyebrow="Workload"
             title="Credit hours per semester"
-            description="Changing this recalculates your whole plan."
+            description="Changes your whole plan."
           />
           <CardBody>
             <Segmented

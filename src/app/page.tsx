@@ -102,7 +102,7 @@ function PreviewSkeleton() {
 function SectionHeading({ eyebrow, title, body }: { eyebrow: string; title: string; body?: string }) {
   return (
     <div className="reveal max-w-2xl">
-      <p className="num text-[11.5px] font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
+      <p className="text-[13.5px] font-medium text-accent">{eyebrow}</p>
       <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
       {body && <p className="mt-3 text-[15px] leading-relaxed text-muted">{body}</p>}
     </div>
@@ -182,7 +182,7 @@ export default function LandingPage() {
                     <span className="size-2.5 rounded-full bg-warn/60" />
                     <span className="size-2.5 rounded-full bg-done/60" />
                   </div>
-                  <figcaption className="num truncate text-[11px] uppercase tracking-[0.1em] text-dim">
+                  <figcaption className="truncate text-[12.5px] font-medium text-muted">
                     Live preview · sample Software Engineering student
                   </figcaption>
                 </div>

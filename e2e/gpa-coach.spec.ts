@@ -100,7 +100,7 @@ test.describe("AI coach", () => {
 
     await openDemo(page);
     await page.getByRole("link", { name: /AI Coach/ }).first().click();
-    await expect(page.getByRole("heading", { name: "Project ideas for you" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "AI coach", level: 1 })).toBeVisible();
     // The privacy note names the provider the server actually uses.
     await expect(page.getByText(/to Groq \(openai\/gpt-oss-120b\)/)).toBeVisible();
     await expect(page.getByRole("link", { name: "Their data policy" })).toHaveAttribute("href", STATUS.privacyUrl);

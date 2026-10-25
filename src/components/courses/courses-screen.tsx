@@ -69,9 +69,8 @@ export function CoursesScreen() {
   return (
     <div className="page-in mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageHeader
-        eyebrow="02 · My Courses"
         title="Your courses"
-        description="Tick the courses you've finished, and use the hourglass for ones you're taking this semester. Everything updates instantly."
+        description="Tick what you've finished. Use the hourglass for courses you're taking now."
       />
 
       <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">

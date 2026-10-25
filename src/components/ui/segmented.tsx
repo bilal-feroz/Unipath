@@ -33,7 +33,7 @@ export function Segmented<T extends string | number>({
           key={String(o.value)}
           value={String(o.value)}
           title={o.hint}
-          className="num h-8 min-w-11 rounded-lg px-3 text-[13px] text-muted transition-colors hover:text-fg data-[state=checked]:bg-accent data-[state=checked]:font-semibold data-[state=checked]:text-accent-fg"
+          className="h-8 min-w-11 rounded-lg px-3 text-[13px] text-muted transition-colors hover:text-fg data-[state=checked]:bg-accent data-[state=checked]:font-semibold data-[state=checked]:text-accent-fg"
         >
           {o.label}
         </RadioGroup.Item>

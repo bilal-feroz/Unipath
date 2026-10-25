@@ -18,7 +18,7 @@ export function SiteFooter() {
           <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-dim">{site.disclaimer}</p>
         </div>
         <div>
-          <h2 className="num text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Curriculum data</h2>
+          <h2 className="text-[12.5px] font-medium text-muted">Curriculum data</h2>
           <ul className="mt-3 space-y-1.5 text-sm text-muted">
             {curricula.map((c) => (
               <li key={c.id}>
@@ -31,7 +31,7 @@ export function SiteFooter() {
           </Link>
         </div>
         <div>
-          <h2 className="num text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Project</h2>
+          <h2 className="text-[12.5px] font-medium text-muted">Project</h2>
           <ul className="mt-3 space-y-1.5 text-sm text-muted">
             <li>Built for {site.hackathon}</li>
             <li>Team: {site.team.join(", ")}</li>

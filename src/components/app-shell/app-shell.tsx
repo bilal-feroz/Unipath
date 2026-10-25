@@ -8,8 +8,6 @@ import { BrowserOnly } from "@/components/browser-only";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Pill } from "@/components/ui/pill";
-import { getUniversity } from "@/lib/curriculum/registry";
 import { usePlan } from "@/lib/state/use-plan";
 import { useAppStore } from "@/lib/state/store";
 import { cn } from "@/lib/utils";
@@ -28,17 +26,14 @@ function DesktopNav() {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            aria-label={item.label === item.short ? undefined : item.label}
             className={cn(
-              "relative flex h-[60px] items-center gap-2 px-2.5 text-[14px] transition-colors lg:px-3 xl:px-3.5",
-              active ? "font-semibold text-fg" : "text-muted hover:text-fg",
+              "relative flex h-[60px] items-center whitespace-nowrap px-3 text-[14px] transition-colors lg:px-4",
+              active ? "font-medium text-fg" : "text-muted hover:text-fg",
             )}
           >
-            <span className={cn("num hidden text-[11.5px] xl:inline", active ? "text-accent" : "text-dim")}>{item.n}</span>
-            <span className="xl:hidden">{item.short}</span>
-            <span className="hidden xl:inline">{item.label}</span>
-            {active && (
-              <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
-            )}
+            {item.short}
+            {active && <span className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-accent lg:inset-x-4" />}
           </Link>
         );
       })}
@@ -172,26 +167,9 @@ function ShellContent({ children }: { children: ReactNode }) {
       </ShellFrame>
     );
   }
-  const university = getUniversity(plan.curriculum.universityId);
   return (
     <PlanProvider plan={plan}>
-      <ShellFrame
-        right={
-          <>
-            <Link
-              href="/about"
-              className="hidden items-center gap-2 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-[13px] text-muted hover:border-line-strong hover:text-fg 2xl:flex"
-              title={`${plan.curriculum.degree} in ${plan.curriculum.majorName}, ${university?.name}`}
-            >
-              <Pill tone="accent" className="h-5 px-1.5">
-                {university?.shortName}
-              </Pill>
-              <span className="max-w-[160px] truncate font-medium text-fg">{plan.curriculum.majorName}</span>
-            </Link>
-            <SettingsMenu />
-          </>
-        }
-      >
+      <ShellFrame right={<SettingsMenu />}>
         <Banners />
         <main id="main" className="flex-1 pb-24 md:pb-12">
           {children}
@@ -227,12 +205,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 /** Consistent page heading for every app screen. */
 export function PageHeader({
-  eyebrow,
   title,
   description,
   action,
 }: {
-  eyebrow: string;
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
@@ -240,8 +216,7 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <p className="num text-[11.5px] font-semibold uppercase tracking-[0.14em] text-accent">{eyebrow}</p>
-        <h1 className="mt-1.5 text-[26px] font-semibold leading-tight tracking-tight text-fg sm:text-[30px]">{title}</h1>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-tight text-fg sm:text-[30px]">{title}</h1>
         {description && <p className="mt-1.5 max-w-2xl text-[15px] text-muted">{description}</p>}
       </div>
       {action}

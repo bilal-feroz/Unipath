@@ -18,9 +18,8 @@ export function KeyCourses({ onOpenCourse }: { onOpenCourse: (code: string) => v
     <Card aria-labelledby="key-title">
       <CardHeader
         titleId="key-title"
-        eyebrow="Key courses"
         title="Don't put these off"
-        description="Ranked by how many later courses wait on them. A simple measure, not a guarantee."
+        description="The most later courses wait on these."
       />
       <CardBody>
         {top.length === 0 ? (

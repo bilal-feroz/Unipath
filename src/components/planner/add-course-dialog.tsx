@@ -39,7 +39,7 @@ export function AddCourseDialog() {
       >
         <SearchInput label="Search courses" placeholder="Search by name or code…" value={query} onChange={(e) => setQuery(e.target.value)} />
 
-        <h3 className="num mt-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Available now</h3>
+        <h3 className="mt-5 text-[12.5px] font-medium text-muted">Available now</h3>
         {available.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No other available courses match.</p>
         ) : (
@@ -71,7 +71,7 @@ export function AddCourseDialog() {
           </ul>
         )}
 
-        <h3 className="num mt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Not available yet</h3>
+        <h3 className="mt-6 text-[12.5px] font-medium text-muted">Not available yet</h3>
         {locked.length === 0 ? (
           <p className="mt-2 text-sm text-muted">Nothing locked matches.</p>
         ) : (

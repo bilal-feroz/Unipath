@@ -93,7 +93,7 @@ function PrereqTree({ check, onSelect }: { check: PrereqCheck; onSelect?: (code:
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="border-t border-line py-4 first:border-t-0 first:pt-0">
-      <h3 className="num mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">{title}</h3>
+      <h3 className="mb-2 text-[12.5px] font-medium text-muted">{title}</h3>
       {children}
     </section>
   );

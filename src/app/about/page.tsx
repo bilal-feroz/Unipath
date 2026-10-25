@@ -36,7 +36,7 @@ export default function AboutPage() {
         </div>
       </header>
       <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
-        <p className="num text-[11.5px] font-semibold uppercase tracking-[0.14em] text-accent">About UniPath</p>
+        <p className="text-[13.5px] font-medium text-accent">About UniPath</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Where the data comes from, and how planning works</h1>
         <p className="mt-4 text-[15px] leading-relaxed text-muted">{site.disclaimer}</p>
 

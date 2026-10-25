@@ -20,7 +20,8 @@ test.describe("first-time student", () => {
     await expect(page.getByText(/Estimated graduation/i).first()).toBeVisible();
 
     await page.getByRole("link", { name: "Plan my next semester" }).click();
-    await expect(page.getByRole("heading", { name: "Recommended next semester" })).toBeVisible();
+    await expect(page).toHaveURL(/\/planner/);
+    await expect(page.getByRole("list", { name: /Courses planned for/ })).toBeVisible();
     const planned = page.getByRole("list", { name: /Courses planned for/ }).getByRole("listitem").filter({ has: page.getByRole("button", { name: /^Remove / }) });
     expect(await planned.count()).toBeGreaterThan(3);
     // Every recommendation explains itself.

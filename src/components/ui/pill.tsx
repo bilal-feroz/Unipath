@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 const tones = {
   neutral: "border-line-strong bg-surface-2/60 text-muted",
-  accent: "border-accent/35 bg-accent-soft text-accent",
+  accent: "border-accent/35 bg-accent-soft text-accent-strong",
   done: "border-done/35 bg-done-soft text-done",
   open: "border-open/35 bg-open-soft text-open",
   plan: "border-plan/35 bg-plan-soft text-plan",
@@ -13,12 +13,12 @@ const tones = {
 
 export type PillTone = keyof typeof tones;
 
-/** Small uppercase label, used for tags like "ESTIMATE" or "OFFICIAL DATA". */
+/** Small tag, e.g. "Estimate" or a GPA rating. */
 export function Pill({ tone = "neutral", className, ...props }: ComponentProps<"span"> & { tone?: PillTone }) {
   return (
     <span
       className={cn(
-        "num inline-flex h-[22px] items-center gap-1 whitespace-nowrap rounded-md border px-2 text-[10.5px] font-semibold uppercase tracking-[0.08em]",
+        "inline-flex h-[22px] items-center gap-1 whitespace-nowrap rounded-md border px-2 text-[12px] font-medium",
         tones[tone],
         className,
       )}

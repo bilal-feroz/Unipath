@@ -2,8 +2,13 @@ import dagre from "@dagrejs/dagre";
 import type { PrereqExpr } from "@/lib/curriculum/types";
 import type { CurriculumIndex } from "@/lib/engine";
 
-export const NODE_W = 212;
-export const NODE_H = 66;
+export const NODE_W = 200;
+export const NODE_H = 52;
+
+export interface Point {
+  x: number;
+  y: number;
+}
 
 export interface MapEdge {
   id: string;
@@ -11,16 +16,18 @@ export interface MapEdge {
   target: string;
   /** Part of an "any one of" rule, so not strictly required. */
   alternative: boolean;
+  /** Where the line bends to go around other courses (from the layout), between the two ends. */
+  waypoints: Point[];
 }
 
 export interface MapLayout {
-  positions: Map<string, { x: number; y: number }>;
+  positions: Map<string, Point>;
   edges: MapEdge[];
+  /** Courses with no prerequisite links at all. They're left off the map (the list view has them). */
   standalone: string[];
-  standaloneLabelY: number;
 }
 
-function collectEdges(expr: PrereqExpr | null, target: string, alternative: boolean, out: MapEdge[]) {
+function collectEdges(expr: PrereqExpr | null, target: string, alternative: boolean, out: Omit<MapEdge, "waypoints">[]) {
   if (!expr) return;
   switch (expr.kind) {
     case "course":
@@ -36,17 +43,23 @@ function collectEdges(expr: PrereqExpr | null, target: string, alternative: bool
 }
 
 /**
- * Lays out the prerequisite graph left-to-right with dagre (layered layout that minimises crossings).
- * Courses with no prerequisite links are placed in a tidy grid underneath instead of piling up in one column.
+ * Lays out the prerequisite graph left-to-right with dagre (a layered layout that minimises crossings).
+ * Lines keep dagre's routing, so a line that skips a column bends around the courses in between
+ * instead of crossing them.
  */
 export function layoutDegreeMap(index: CurriculumIndex): MapLayout {
-  const edges: MapEdge[] = [];
-  for (const course of index.curriculum.courses) collectEdges(course.prerequisite, course.code, false, edges);
-  const valid = edges.filter((e) => index.byCode.has(e.source) && index.byCode.has(e.target));
+  const raw: Omit<MapEdge, "waypoints">[] = [];
+  for (const course of index.curriculum.courses) collectEdges(course.prerequisite, course.code, false, raw);
+  const seen = new Set<string>();
+  const valid = raw.filter((e) => {
+    if (!index.byCode.has(e.source) || !index.byCode.has(e.target) || seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
   const linked = new Set(valid.flatMap((e) => [e.source, e.target]));
 
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: "LR", nodesep: 22, ranksep: 90, marginx: 20, marginy: 20 });
+  g.setGraph({ rankdir: "LR", nodesep: 18, ranksep: 72, edgesep: 12, marginx: 24, marginy: 24 });
   g.setDefaultEdgeLabel(() => ({}));
   // Insert in suggested-semester order so the layout follows the official sequence where it can.
   const ordered = [...index.curriculum.courses].sort(
@@ -56,25 +69,35 @@ export function layoutDegreeMap(index: CurriculumIndex): MapLayout {
   for (const e of valid) g.setEdge(e.source, e.target);
   dagre.layout(g);
 
-  const positions = new Map<string, { x: number; y: number }>();
-  let maxY = 0;
+  const positions = new Map<string, Point>();
   for (const code of linked) {
     const n = g.node(code);
     positions.set(code, { x: n.x - NODE_W / 2, y: n.y - NODE_H / 2 });
-    maxY = Math.max(maxY, n.y + NODE_H / 2);
   }
 
-  const standalone = ordered.filter((c) => !linked.has(c.code)).map((c) => c.code);
-  const cols = 6;
-  const startY = maxY + 110;
-  standalone.forEach((code, i) => {
-    positions.set(code, {
-      x: 20 + (i % cols) * (NODE_W + 22),
-      y: startY + Math.floor(i / cols) * (NODE_H + 22),
-    });
+  const edges: MapEdge[] = valid.map((e) => {
+    const points: Point[] = g.edge(e.source, e.target)?.points ?? [];
+    // The first and last points sit on the course boxes; the map draws those ends from its own handles.
+    return { ...e, waypoints: points.slice(1, -1).map((p) => ({ x: p.x, y: p.y })) };
   });
 
-  return { positions, edges: valid, standalone, standaloneLabelY: startY - 46 };
+  return { positions, edges, standalone: ordered.filter((c) => !linked.has(c.code)).map((c) => c.code) };
+}
+
+/** A smooth SVG path through the points (Catmull-Rom spline drawn as cubic Béziers). */
+export function smoothPath(points: Point[]): string {
+  if (points.length === 0) return "";
+  let d = `M ${points[0].x},${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] ?? p2;
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    d += ` C ${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y}`;
+  }
+  return d;
 }
 
 /** All prerequisites (transitively) of a course, and all courses that depend on it. */

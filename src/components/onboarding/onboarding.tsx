@@ -264,7 +264,7 @@ export function Onboarding() {
             if (majors.length === 0) return null;
             return (
               <div key={college.college} className="mt-6">
-                <h2 className="num text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">{college.college}</h2>
+                <h2 className="text-[12.5px] font-medium text-muted">{college.college}</h2>
                 <div role="radiogroup" aria-label={college.college} className="mt-3 space-y-3">
                   {majors.map((m) => {
                     const version = m.versions[0];

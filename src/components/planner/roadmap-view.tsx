@@ -25,7 +25,7 @@ export function RoadmapView({ onOpenCourse }: { onOpenCourse: (code: string) => 
       <Card className="print:hidden">
         <CardBody className="grid gap-5 pt-5 md:grid-cols-[auto_1fr] md:items-center">
           <div>
-            <p className="num text-[11px] font-semibold uppercase tracking-[0.12em] text-dim">Credit hours per semester</p>
+            <p className="text-[12.5px] font-medium text-muted">Credit hours per semester</p>
             <Segmented
               className="mt-2"
               label="Credit hours per semester"
