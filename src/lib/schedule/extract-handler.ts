@@ -65,10 +65,13 @@ export function normaliseAiItems(raw: unknown, text: string, today: string, code
     if (!courseCode && !["registration", "payment", "admin", "event"].includes(type)) flags.push("no-course");
     if (type === "other") flags.push("unknown-type");
     if (date && date < today) flags.push("past-date");
+    // Numeric dates like 05/11 read either way; say so whichever reading the AI picked.
+    const numeric = /\b(\d{1,2})[/.](\d{1,2})\b/.exec(source);
+    if (numeric && +numeric[1] <= 12 && +numeric[2] <= 12 && numeric[1] !== numeric[2]) flags.push("ambiguous-date");
     // A quote that isn't in the text means the answer can't be trusted as-is.
     const quoted = source.length > 0 && haystack.includes(normalise(source));
     const confidence: ExtractedItem["confidence"] =
-      !quoted || !date || type === "other" ? "low" : flags.some((f) => f !== "no-time") ? "medium" : "high";
+      !quoted || !date || type === "other" || flags.includes("ambiguous-date") ? "low" : flags.some((f) => f !== "no-time") ? "medium" : "high";
     out.push({ id: `ai-${i}`, title: title || source.slice(0, 80), type, courseCode, date, time, location, source: quoted ? source : "", confidence, flags });
   }
   return out;

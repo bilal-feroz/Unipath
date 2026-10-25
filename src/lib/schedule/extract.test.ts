@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractDeadlines } from "./extract";
+import { normaliseAiItems } from "./extract-handler";
 
 const courses = [
   { code: "0102330", title: "Database Systems" },
@@ -52,6 +53,32 @@ describe("deadline extraction", () => {
     expect(unknown.type).toBe("other");
     expect(unknown.flags).toContain("unknown-type");
     expect(past.flags).toContain("past-date");
+  });
+
+  it("checks the AI reader's answer against the text", () => {
+    const text = "Quiz 1 is on 3 November at 10:00. Project proposal due 12/11.";
+    const items = normaliseAiItems(
+      {
+        items: [
+          { title: "Quiz 1", type: "quiz", courseCode: "0102330", date: "2026-11-03", time: "10:00", yearStated: false, location: "", source: "Quiz 1 is on 3 November at 10:00." },
+          { title: "Proposal", type: "project", courseCode: "9999999", date: "2026-11-12", time: null, yearStated: false, location: "", source: "Project proposal due 12/11." },
+          { title: "Made up", type: "final", courseCode: null, date: "2026-12-01", time: "09:00", yearStated: true, location: "", source: "Final exam on 1 December" },
+          { title: "Bad", type: "nonsense", date: "2026-02-31", time: "25:00" },
+        ],
+      },
+      text,
+      "2026-10-25",
+      new Set(["0102330"]),
+    );
+    expect(items.map((i) => [i.type, i.date, i.time, i.courseCode, i.confidence])).toEqual([
+      ["quiz", "2026-11-03", "10:00", "0102330", "medium"],
+      ["project", "2026-11-12", null, null, "low"],
+      ["final", "2026-12-01", "09:00", null, "low"],
+      ["other", null, null, null, "low"],
+    ]);
+    expect(items[1].flags).toContain("ambiguous-date");
+    // A quote that isn't in the text is dropped, so the student is told to check it.
+    expect(items[2].source).toBe("");
   });
 
   it("ignores text without dates", () => {
