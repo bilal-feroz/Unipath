@@ -139,7 +139,7 @@ docs/ARCHITECTURE.md      design decisions
 | Member | Contributions |
 | --- | --- |
 | Bilal Feroz | _[add contributions]_ |
-| _[teammate name]_ | _[add contributions]_ |
+| Faheem Abdul Azees | _[add contributions]_ |
 
 ## AI assistance disclosure
 
