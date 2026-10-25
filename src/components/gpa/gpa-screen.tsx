@@ -87,7 +87,7 @@ export function GpaScreen() {
         description={`Add your grades to see your CGPA on ${university?.shortName ?? "your university"}'s official ${scale.maxPoints.toFixed(1)} scale.`}
       />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <Card aria-labelledby="cgpa-title">
             <CardHeader titleId="cgpa-title" title="Cumulative GPA" />

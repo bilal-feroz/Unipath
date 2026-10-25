@@ -65,13 +65,14 @@ export function NotificationBell() {
   const top = notifications.slice(0, 6);
   return (
     <Popover.Root>
-      <Popover.Trigger
-        aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
-        className="relative inline-flex size-10 items-center justify-center rounded-[10px] border border-line bg-surface-2 text-fg hover:border-line-strong"
-      >
-        <Bell className="size-4" />
+      <Popover.Trigger className="relative inline-flex size-10 items-center justify-center rounded-[10px] border border-line bg-surface-2 text-fg hover:border-line-strong">
+        <Bell aria-hidden className="size-4" />
+        <span className="sr-only">{unread ? `Notifications, ${unread} unread` : "Notifications"}</span>
         {unread > 0 && (
-          <span className="num absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[10.5px] font-semibold text-white">
+          <span
+            aria-hidden
+            className="num absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[10.5px] font-semibold text-bg"
+          >
             {unread > 9 ? "9+" : unread}
           </span>
         )}

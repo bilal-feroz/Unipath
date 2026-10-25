@@ -18,10 +18,11 @@ import { useSchedule } from "./schedule-context";
 
 export const MARK_LABEL: Record<AttendanceMark, string> = { present: "Present", absent: "Absent", late: "Late", excused: "Excused" };
 export const MARK_TONE: Record<AttendanceMark, string> = {
-  present: "border-done bg-done text-[#04110a]",
-  absent: "border-danger bg-danger text-white",
-  late: "border-now bg-now text-[#1a1200]",
-  excused: "border-lock bg-lock text-white",
+  // The page background as text colour stays readable on these solid colours in both themes.
+  present: "border-done bg-done text-bg",
+  absent: "border-danger bg-danger text-bg",
+  late: "border-now bg-now text-bg",
+  excused: "border-lock bg-lock text-bg",
 };
 
 /** Buttons to record attendance for one class meeting. */

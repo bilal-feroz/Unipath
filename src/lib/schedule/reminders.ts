@@ -109,7 +109,7 @@ export function dueNotifications(
       out.push({
         id: `event:${item.id}:${r.events}`,
         category: "event",
-        title: `${item.title} ${item.start ? when(until) : formatDate(item.date) === formatDate(now.date) ? "today" : formatDate(item.date)}`,
+        title: `${item.title} ${item.start ? when(until) : item.date === now.date ? "today" : `on ${formatDate(item.date)}`}`,
         body: [item.start ? formatTime(item.start) : "All day", item.location].filter(Boolean).join(" · "),
         href: "/calendar",
         date: item.date,

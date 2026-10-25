@@ -64,15 +64,21 @@ test.describe("taking courses this semester", () => {
   test("plans next semester as if current courses are passed", async ({ page }) => {
     await openDemo(page);
     await page.goto("/courses");
-    const srs = page.getByTestId("course-0103320");
-    await srs.getByRole("button", { name: "Software Requirements and Specification: taking this semester" }).click();
-    await expect(page.getByText("Taking Software Requirements and Specification this semester")).toBeVisible();
-    await expect(srs.getByText("Taking now").first()).toBeVisible();
+    // The sample student already takes Software Requirements this semester, so nothing plans it again.
+    await expect(page.getByTestId("course-0103320").getByText("Taking now").first()).toBeVisible();
+    const numerical = page.getByTestId("course-0107201");
+    await expect(numerical.getByText("Locked").first()).toBeVisible();
+
+    const calc = page.getByTestId("course-0107104");
+    await calc.getByRole("button", { name: "Calculus II: taking this semester" }).click();
+    await expect(page.getByText("Taking Calculus II this semester")).toBeVisible();
+    await expect(calc.getByText("Taking now").first()).toBeVisible();
+    // Introduction to Numerical Methods needs Calculus II, so it opens up for next semester.
+    await expect(numerical.getByText("Locked")).toHaveCount(0);
 
     await page.goto("/planner");
+    await expect(page.getByTestId("planned-0107104")).toHaveCount(0);
     await expect(page.getByTestId("planned-0103320")).toHaveCount(0);
-    // Software Design and Development needs it, so it's now planned for next semester.
-    await expect(page.getByTestId("planned-0103330")).toBeVisible();
   });
 });
 

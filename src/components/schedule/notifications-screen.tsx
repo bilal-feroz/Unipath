@@ -32,7 +32,7 @@ export function NotificationsScreen() {
         }
       />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card aria-labelledby="alerts-title">
           <CardHeader titleId="alerts-title" title="Needs attention" description="Conflicts and risks, with what to do about them." />
           <CardBody>

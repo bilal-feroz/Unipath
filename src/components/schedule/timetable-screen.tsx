@@ -223,7 +223,7 @@ export function TimetableScreen() {
           )}
 
           {byCourse.length > 0 && (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card aria-labelledby="courses-title">
                 <CardHeader titleId="courses-title" title="Your classes" description="Tap a class to edit it." />
                 <CardBody>

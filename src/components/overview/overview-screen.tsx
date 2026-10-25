@@ -95,7 +95,7 @@ function SetupChecklist() {
           <X /> Hide
         </Button>
       </div>
-      <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+      <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {open.map((s) => (
           <li key={s.id} className="flex items-center gap-2 rounded-xl border border-line bg-bg/50 px-3 py-2">
             <Circle aria-hidden className="size-4 shrink-0 text-accent" />
@@ -537,7 +537,7 @@ export function OverviewScreen() {
         </p>
       )}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <TodayCard />
         <AcademicCard />
         <PrioritiesCard />

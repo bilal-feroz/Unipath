@@ -18,7 +18,7 @@ export function AttendanceRuleFields({
   onInherit?: (inherit: boolean) => void;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_140px]">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_140px]">
       <Field label="Rule">
         {(id) => (
           <NativeSelect

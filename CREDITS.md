@@ -32,6 +32,7 @@ Interpretations of inconsistent or incomplete source data are listed in each dat
 | [Zod](https://zod.dev) | Curriculum and saved-state validation | MIT |
 | [Zustand](https://github.com/pmndrs/zustand) | State management | MIT |
 | [Sonner](https://sonner.emilkowal.ski) | Toast notifications | MIT |
+| [unpdf](https://github.com/unjs/unpdf) (bundles Mozilla's PDF.js) | Reading text from PDFs in the browser for deadline import | MIT (PDF.js: Apache-2.0) |
 | [Groq API](https://console.groq.com) | AI Coach (`openai/gpt-oss-120b` with browser search), free tier | Groq Services Agreement |
 | [gpt-oss-120b](https://huggingface.co/openai/gpt-oss-120b) | Open-weight model the AI Coach runs on Groq | Apache-2.0 |
 | [Google Gemini API](https://ai.google.dev) | AI Coach alternative (Gemini 2.5 Flash with Google Search grounding), free tier | Google API Terms of Service |

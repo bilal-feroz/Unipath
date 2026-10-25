@@ -179,7 +179,7 @@ function Banners() {
               <span className="font-semibold">Demo mode.</span>{" "}
               <span className="text-muted sm:hidden">Sample student.</span>
               <span className="hidden text-muted sm:inline">
-                You&apos;re exploring a sample Software Engineering student. Changes stay in demo mode.
+                You&apos;re exploring a sample Software Engineering student. Their classes, rooms, people and deadlines are made up. Changes stay in demo mode.
               </span>
             </p>
             <Link href="/start" className="font-semibold text-plan underline-offset-4 hover:underline">

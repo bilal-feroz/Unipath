@@ -27,7 +27,12 @@ Legend: ✅ done in the repository · ⬜ needs the team
 
 These are intentionally not built; none of them are claimed in the UI:
 
-- GPA projection, target GPA planning and academic standing alerts (the GPA tracker shows current CGPA and rating only)
+- Academic standing (warning/probation) alerts
+- Reminders when the browser is closed (no push server; reminders work while UniPath is open)
+- University portal integration (timetables, deadlines and events are entered or imported by the student)
+- A verified campus map, indoor navigation or walking-time estimates (CampusFlow uses the student's own timetable rooms and notes)
+- Reading deadlines from screenshots or scanned PDFs (text and text PDFs only)
+- Accounts and cross-device sync
 - Shareable plan links
 - AI explanations of the planner's own results (the AI Coach covers project ideas only)
 - Section/timetable/seat availability

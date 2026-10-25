@@ -107,7 +107,7 @@ export function SettingsScreen() {
 
         <Card aria-labelledby="checks-title">
           <CardHeader titleId="checks-title" title="Conflict checks" description="Your own thresholds. UniPath doesn't know your campus layout or exam rules." />
-          <CardBody className="grid gap-3 sm:grid-cols-2">
+          <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <NumberSetting label="Time I need to change buildings (min)" hint="0 turns this check off" value={life.travelBufferMin} min={0} max={120} onChange={(v) => update((l) => ({ ...l, travelBufferMin: v }))} />
             <NumberSetting label="Warn when exams are closer than (min)" hint="Gap between the end of one and the start of the next" value={life.examGapMin} min={0} max={600} onChange={(v) => update((l) => ({ ...l, examGapMin: v }))} />
             <NumberSetting label="Deadlines on one day before warning" hint="2 to 6" value={life.clusterThreshold} min={2} max={6} onChange={(v) => update((l) => ({ ...l, clusterThreshold: v }))} />
@@ -119,7 +119,7 @@ export function SettingsScreen() {
           <CardHeader titleId="att-title" title="Attendance rule" description="Enter your university's rule from the student handbook. You can set a different rule for a course on the Attendance page." />
           <CardBody className="space-y-3">
             <AttendanceRuleFields rule={life.attendance} onChange={(rule) => update((l) => ({ ...l, attendance: { ...l.attendance, ...rule } }))} />
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="A late arrival counts as">
                 {(id) => (
                   <NativeSelect id={id} value={life.attendance.late} onChange={(e) => update((l) => ({ ...l, attendance: { ...l.attendance, late: e.target.value as "present" | "absent" } }))}>

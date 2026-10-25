@@ -2,7 +2,7 @@
 
 ## Goals that shaped the design
 
-1. **Simple for students.** Four destinations (Overview, My Courses, Semester Planner, Degree Map); everything else lives in a settings menu or a detail panel.
+1. **Simple for students.** Six top-level destinations (Home, Academics ▾, Schedule ▾, Campus ▾, Attendance, AI Coach), grouped so the bar never grows; phones get four tabs plus "More". Settings live in a menu or on the page they affect.
 2. **Correct before clever.** Academic rules are computed by a deterministic engine with unit tests, never by UI code or a language model.
 3. **University-independent.** A curriculum is data. Adding a major means adding a JSON file.
 4. **No backend.** Hackathon-friendly, free to host, private by default.
@@ -23,7 +23,9 @@ data (JSON)  →  curriculum (schema, parser, validation, registry)  →  engine
 | Validation | `src/lib/curriculum/validate.ts` | Duplicates, missing references, cycles (DFS), credits, group totals, impossible electives, unreachable thresholds. |
 | Registry | `src/lib/curriculum/registry.ts` | Only curricula with zero errors are offered. |
 | Engine | `src/lib/engine` | Progress, course status, targets (what's left, incl. elective slots), scheduler (roadmap), insights, simulation, academic terms. All pure and deterministic. |
-| State | `src/lib/state` | Profiles (`personal`, `demo`), per-curriculum progress, preferences. Versioned schema, migrations hook, corrupted-data backups. |
+| State | `src/lib/state` | Profiles (`personal`, `demo`), per-curriculum progress (incl. grades, grade semesters, earlier attempts, forecasts), per-curriculum semester schedules, preferences and life settings. Versioned schema (v2) with step-by-step migrations and corrupted-data backups. |
+| Schedule engine | `src/lib/schedule` | Class meetings, the unified calendar feed, task ranking, conflict rules, attendance, reminders, today's priorities, deadline extraction. All pure and deterministic; "now" is passed in. |
+| Campus | `src/lib/campus` | Registry for verified campus maps (empty for AAU until one is transcribed). |
 | View model | `src/lib/plan.ts` | One function turns saved progress into everything a screen needs. |
 | UI | `src/components`, `src/app` | Client components inside a browser-only boundary, because progress lives in localStorage. |
 
@@ -39,9 +41,28 @@ data (JSON)  →  curriculum (schema, parser, validation, registry)  →  engine
 - **Never discard saved data silently.** Unreadable or newer-version data is copied to a backup key and the student is told.
 - **Browser-only rendering.** App screens render inside a React `use(browser())` boundary so the server never renders stale or mismatched progress. These routes opt out of Next.js instant-navigation validation (`export const instant = false`) because there is no server-rendered content to validate.
 
-## GPA tracker
+## GPA tracker and forecast
 
-`src/lib/gpa` holds grading scales as data (only scales transcribed from an official source; AAU's undergraduate scale today) and a pure `computeGpa` (credit-weighted grade points ÷ graded credits, rounded to two decimals, rated with the official bands). Grades live in each curriculum's saved progress, next to completed courses.
+`src/lib/gpa` holds grading scales as data (only scales transcribed from an official source; AAU's undergraduate scale today, including F = 0) and pure functions. `computeGpa` is the original passed-courses calculation. `forecast.ts` builds every graded attempt into entries (final grades, earlier attempts, forecast grades), applies the student's repeat policy (`all` attempts or `latest` only — AAU's page doesn't say, so it's a setting), and sums them: SGPA per semester, CGPA after each semester, a forecast from expected grades, the average needed for a target (a displayed 3.80 means ≥ 3.795 unrounded), and per-course impact. With no attempts recorded, the result equals `computeGpa`, so existing saved grades show the same CGPA after the upgrade.
+
+## Semester schedule
+
+One model drives the whole day:
+
+```
+sessions (weekly) + exceptions + extras + term/holidays ─→ class meetings ─┐
+tasks (deadlines, exams) ──────────────────────────────────────────────────┼─→ agenda items ─→ calendar, Home,
+events (repeating or one-off) ─────────────────────────────────────────────┘        ↓         CampusFlow
+                                                                      conflict rules, reminders, priorities
+```
+
+- **Meetings** are generated for the whole semester and keyed `sessionId@originalDate`, so a moved class keeps its attendance and its alerts follow the new time. Cancelled and holiday meetings stay in the feed, marked, so they can be shown and excluded from attendance.
+- **Conflicts** are recomputed from current data on every change. Alert ids encode the items and their times, so dismissing sticks while nothing changes, and editing a time clears or replaces the alert. Dismissed/resolved/snoozed state is stored per schedule.
+- **Thresholds are the student's**: travel time between buildings, minimum gap between exams, deadlines per day, admin warning window, attendance rule. No university policy is assumed.
+- **Time zone:** `zonedNow(now, zone)` turns an instant into the campus date and minutes via `Intl`, so "today" is right even when the device is elsewhere.
+- **Reminders** are derived (not scheduled): each render computes which reminders are due under the student's offsets; ids are stable, so read state and browser delivery happen once. Browser notifications fire only while a tab is open — there's no push server.
+- **Deadline import:** the offline reader (`extract.ts`) and the AI reader (`/api/extract`, sharing the coach's provider and rate limiter, search off) both produce the same `ExtractedItem` shape with flags (no year, no time, ambiguous day/month, no course, past date). The server checks that each AI quote appears in the submitted text. PDFs are converted to text in the browser with unpdf.
+- **Demo data** is generated relative to the current date (and regenerated daily) so the sample student always has classes today and something to show.
 
 ## "Taking now"
 

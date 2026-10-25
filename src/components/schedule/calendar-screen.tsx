@@ -214,7 +214,7 @@ export function CalendarScreen() {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         {view === "month" && (
           <div className="glass overflow-hidden rounded-2xl border border-line">
             <div className="grid grid-cols-7 border-b border-line">
@@ -234,7 +234,6 @@ export function CalendarScreen() {
                     key={d}
                     type="button"
                     onClick={() => setSelected(d)}
-                    aria-label={`${formatDate(d, { weekday: "long", day: "numeric", month: "long" })}, ${list.length} item${list.length === 1 ? "" : "s"}`}
                     aria-pressed={selected === d}
                     className={cn(
                       "min-h-[86px] border-b border-r border-line/70 p-1.5 text-left align-top transition-colors hover:bg-surface-2/50 sm:min-h-[104px]",
@@ -242,7 +241,10 @@ export function CalendarScreen() {
                       selected === d && "bg-accent-soft",
                     )}
                   >
-                    <span className="flex items-center justify-between">
+                    <span className="sr-only">
+                      {formatDate(d, { weekday: "long", day: "numeric", month: "long" })}, {list.length} item{list.length === 1 ? "" : "s"}
+                    </span>
+                    <span aria-hidden className="flex items-center justify-between">
                       <span
                         className={cn(
                           "num inline-flex size-6 items-center justify-center rounded-full text-[12px]",
@@ -253,7 +255,7 @@ export function CalendarScreen() {
                       </span>
                       {warn && <span aria-hidden className="size-1.5 rounded-full bg-warn" />}
                     </span>
-                    <span className="mt-1 hidden space-y-0.5 sm:block">
+                    <span aria-hidden className="mt-1 hidden space-y-0.5 sm:block">
                       {list.slice(0, 3).map((i) => (
                         <span key={i.id} className={cn("flex items-center gap-1 truncate rounded px-1 text-[11px] leading-[18px]", GROUP_META[itemGroup(i)].chip, i.inactive && "line-through opacity-60")}>
                           {i.title}
@@ -276,7 +278,7 @@ export function CalendarScreen() {
         )}
 
         {view === "week" && (
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-7">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-7">
             {range.days.map((d) => (
               <section key={d} aria-label={formatDate(d, { weekday: "long", day: "numeric", month: "long" })} className={cn("glass min-h-28 rounded-2xl border border-line p-2", d === today && "border-accent/50")}>
                 <button type="button" onClick={() => setSelected(d)} className="mb-1.5 block w-full text-left text-[12.5px] font-medium text-muted hover:text-fg">

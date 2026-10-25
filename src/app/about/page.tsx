@@ -145,8 +145,9 @@ export default function AboutPage() {
 
           <Section id="ai-coach" title="How the AI coach works">
             <p>
-              The AI Coach is the only part of UniPath that uses AI. It suggests portfolio projects and answers questions
-              about them; it never changes your plan or your course rules.
+              AI is used in two places only: the AI Coach, which suggests portfolio projects and answers questions about
+              them, and the optional AI reader for importing deadlines from a course outline. Neither ever changes your
+              plan, your course rules, your GPA, your attendance or the conflict checks — those are all plain calculations.
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
@@ -180,16 +181,24 @@ export default function AboutPage() {
 
           <Section title="Your privacy">
             <p>
-              UniPath has no accounts and no server database. Your progress and grades are saved only in this
-              browser&apos;s local storage, so they stay on this device and are lost if you clear your browser data. Use{" "}
-              <strong className="text-fg">Export progress</strong> in the settings menu to keep a copy.
+              UniPath has no accounts and no server database. Your progress, grades, timetable, deadlines, events and
+              attendance are saved only in this browser&apos;s local storage, so they stay on this device and are lost if you
+              clear your browser data. Use <strong className="text-fg">Export progress</strong> in the settings menu to keep a
+              copy — it includes everything. There&apos;s no cloud sync between devices.
             </p>
             <p>
-              The one exception is the AI Coach, and only when you press a button there: it sends your major, the course
-              codes you&apos;ve completed or are taking, and anything you type (interests, questions) to the AI provider named
-              on that page (Groq or Google Gemini). Your grades, name and saved file are never sent. Groq says it
+              Two exceptions, and only when you press a button: the <strong className="text-fg">AI Coach</strong> sends your
+              major, the course codes you&apos;ve completed or are taking, and anything you type (interests, questions); the{" "}
+              <strong className="text-fg">AI deadline reader</strong> sends the text you import (a PDF is turned into text in
+              your browser first). Both go to the AI provider named on the page (Groq or Google Gemini). Your grades,
+              attendance, name and saved file are never sent, and the offline deadline reader sends nothing. Groq says it
               doesn&apos;t use API requests to train models; on Gemini&apos;s free tier, Google may use requests to improve its
               products.
+            </p>
+            <p>
+              Reminders appear while UniPath is open in a tab. There&apos;s no server that could notify you when the browser is
+              closed, and UniPath isn&apos;t connected to any university system: timetables and deadlines are what you enter
+              or import.
             </p>
           </Section>
         </div>
