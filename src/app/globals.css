@@ -139,6 +139,30 @@ body {
   background-size: 32px 32px;
 }
 
+/* Printing the roadmap: light colours, no navigation chrome. */
+@media print {
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-elev: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #eef2f5;
+    --border: #cfd9e0;
+    --border-strong: #b5c3cc;
+    --text: #0b1a24;
+    --text-muted: #40576a;
+    --text-dim: #5b6f7d;
+    --accent: #0e7490;
+    --shadow: none;
+  }
+  header,
+  nav,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -6,6 +6,12 @@ UniPath turns a university's static study plan into a personal, interactive road
 
 Built for **NextSpark Hacks 2026**. No account, no API keys, no paid services — everything runs in the browser.
 
+![UniPath overview for the sample student](docs/screenshots/desktop-overview.png)
+
+| Semester roadmap | What if? | Phone |
+| --- | --- | --- |
+| ![Roadmap](docs/screenshots/desktop-roadmap.png) | ![What-if simulator](docs/screenshots/desktop-what-if.png) | ![Overview on a phone](docs/screenshots/mobile-overview.png) |
+
 > UniPath is an independent student project. It is not affiliated with or endorsed by Al Ain University. Course data is transcribed from publicly available study plans and may contain mistakes — always confirm your plan with your academic advisor.
 
 ---
